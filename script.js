@@ -3,10 +3,9 @@ import { render, html } from "https://cdn.jsdelivr.net/npm/lit-html@3/+esm";
 import { unsafeHTML } from "https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js";
 import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import { Marked } from "https://cdn.jsdelivr.net/npm/marked@13/+esm";
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1";
 import hljs from "https://cdn.jsdelivr.net/npm/highlight.js@11/+esm";
 import { demos, agentPrompt, validatorPrompt } from "./config.js";
-
-let selectedApiIndex = 0;
 
 const marked = new Marked();
 marked.use({
@@ -29,6 +28,8 @@ const $apiCards = document.querySelector("#api-cards");
 const $exampleQuestions = document.querySelector("#example-questions");
 const $tokenInputs = document.querySelector("#token-inputs");
 const $systemPrompt = document.querySelector("#system-prompt");
+
+saveform("#task-form");
 
 // Render API cards based on config
 function renderApiCards() {
@@ -61,7 +62,6 @@ function renderApiCards() {
 
 // Select an API and update the UI
 function selectApi(index) {
-  selectedApiIndex = index;
   const selectedApi = demos[index];
 
   // Highlight the selected card
@@ -109,8 +109,10 @@ function selectApi(index) {
 $exampleQuestions.addEventListener("click", (e) => {
   const $exampleQuestion = e.target.closest(".example-question");
   if ($exampleQuestion) {
-    document.querySelector("#question").value = $exampleQuestion.textContent;
-    $taskForm.dispatchEvent(new Event("submit"));
+    const $question = document.querySelector("#question");
+    $question.value = $exampleQuestion.textContent;
+    $question.dispatchEvent(new Event("input", { bubbles: true }));
+    $taskForm.dispatchEvent(new Event("submit", { bubbles: true }));
   }
 });
 
