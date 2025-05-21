@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Agent</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22currentColor%22%20class%3D%22bi%20bi-whatsapp%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M13.601%202.326A7.85%207.85%200%200%200%207.994%200C3.627%200%20.068%203.558.064%207.926c0%201.399.366%202.76%201.057%203.965L0%2016l4.204-1.102a7.9%207.9%200%200%200%203.79.965h.004c4.368%200%207.926-3.558%207.93-7.93A7.9%207.9%200%200%200%2013.6%202.326zM7.994%2014.521a6.6%206.6%200%200%201-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56%206.56%200%200%201-1.007-3.505c0-3.626%202.957-6.584%206.591-6.584a6.56%206.56%200%200%201%204.66%201.931%206.56%206.56%200%200%201%201.928%204.66c-.004%203.639-2.961%206.592-6.592%206.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73%200%200%200-.529.247c-.182.198-.691.677-.691%201.654s.71%201.916.81%202.049c.098.133%201.394%202.132%203.383%202.992.47.205.84.326%201.129.418.475.152.904.129%201.246.08.38-.058%201.171-.48%201.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232%22%2F%3E%3C%2Fsvg%3E">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    .narrative {
+      max-width: 40rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href=".">API Agent</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="nav-item dropdown ms-auto" role="group" aria-label="Toggle dark mode" title="Toggle Dark Mode">
+          <button class="dark-theme-toggle btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Toggle theme (auto)">
+            <i class="bi bi-circle-half"></i> <span class="d-lg-none ms-2">Toggle theme</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><button class="dropdown-item" data-bs-theme-value="light"><i class="me-2 bi bi-sun-fill"></i> Light</button></li>
+            <li><button class="dropdown-item" data-bs-theme-value="dark"><i class="me-2 bi bi-moon-stars-fill"></i> Dark</button></li>
+            <li><button class="dropdown-item" data-bs-theme-value="auto"><i class="me-2 bi bi-circle-half"></i> Auto</button></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <h1 class="display-1 my-4 text-center">API Agent</h1>
+    <h2 class="display-6 text-center">Chat with your APIs</h2>
+
+    <div class="mx-auto my-3 narrative">
+      <p>API agent let's you ask questions that can be answered by calling APIs. It's a simple way to get answers to questions that you can't find on the web.</p>
+      <p>With API Agent, you can:</p>
+      <ul>
+        <li><strong>Access real-time data</strong> from multiple sources without writing code</li>
+        <li><strong>Automate research tasks</strong> that would normally require manual API calls</li>
+        <li><strong>Integrate information</strong> across different platforms and services</li>
+      </ul>
+      <p>Business teams use API Agent to monitor competitors, track market trends, and gather intelligence without technical expertise. Developers use it to quickly prototype and test API interactions without writing boilerplate code.</p>
+    </div>
+
+    <!-- API Selection Cards -->
+    <div class="mx-auto my-4">
+      <div id="api-cards" class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-4">
+        <!-- API cards will be dynamically inserted here -->
+      </div>
+    </div>
+
+    <form id="task-form" class="narrative mx-auto">
+
+      <div class="my-4 p-4 card rounded-3 shadow-sm">
+        <h3 class="mb-3">Advanced Settings</h3>
+
+        <div class="accordion my-3" id="advancedSettings">
+          <!-- API Key Setting -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apiKeyCollapse" aria-expanded="false" aria-controls="apiKeyCollapse">
+                <i class="bi bi-key me-2"></i>OpenAI API Key
+              </button>
+            </h2>
+            <div id="apiKeyCollapse" class="accordion-collapse collapse" data-bs-parent="#advancedSettings">
+              <div class="accordion-body">
+                <div class="mb-3">
+                  <label for="apiKeyInput" class="form-label">Enter your OpenAI API Key:</label>
+                  <input type="password" class="form-control" id="apiKeyInput" placeholder="sk-...">
+                  <div class="form-text">Your API key is stored locally in your browser and never sent to our servers.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Base URL Setting -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#baseUrlCollapse" aria-expanded="false" aria-controls="baseUrlCollapse">
+                <i class="bi bi-key me-2"></i>Base URL
+              </button>
+            </h2>
+            <div id="baseUrlCollapse" class="accordion-collapse collapse" data-bs-parent="#advancedSettings">
+              <div class="accordion-body">
+                <div class="mb-3">
+                  <label for="baseUrlInput" class="form-label">Enter your OpenAI API Base URL:</label>
+                  <input type="text" class="form-control" id="baseUrlInput" value="https://llmfoundry.straive.com/openai/v1" list="baseUrlList">
+                  <datalist id="baseUrlList">
+                    <option value="https://api.openai.com/v1"></option>
+                    <option value="https://llmfoundry.straive.com/openai/v1"></option>
+                    <option value="https://llmfoundry.straivedemo.com/openai/v1"></option>
+                    <option value="https://openrouter.ai/api/v1" disabled></option>
+                    <option value="https://aipipe.org/openai/v1" disabled></option>
+                  </datalist>
+                  <div class="form-text">Your API key is stored locally in your browser and never sent to our servers.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- System Prompt Setting -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#systemPromptCollapse" aria-expanded="false" aria-controls="systemPromptCollapse">
+                <i class="bi bi-chat-square-text me-2"></i>System Prompt &amp; Model
+              </button>
+            </h2>
+            <div id="systemPromptCollapse" class="accordion-collapse collapse" data-bs-parent="#advancedSettings">
+              <div class="accordion-body">
+                <div class="mb-3">
+                  <label for="system-prompt" class="form-label">Customize the system prompt:</label>
+                  <textarea class="form-control" id="system-prompt" rows="10"></textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="model" class="form-label">Choose the model:</label>
+                  <input type="text" class="form-control" id="model" value="gpt-4.1-mini" list="modelList">
+                  <datalist id="modelList">
+                    <option value="gpt-4.1-nano"></option>
+                    <option value="gpt-4.1-mini"></option>
+                    <option value="gpt-4.1"></option>
+                    <option value="gpt-4o"></option>
+                    <option value="o4-mini"></option>
+                  </datalist>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#tokenCollapse" aria-expanded="false" aria-controls="tokenCollapse">
+                <i class="bi bi-key me-2"></i>API Tokens
+              </button>
+            </h2>
+            <div id="tokenCollapse" class="accordion-collapse collapse" data-bs-parent="#tokenAccordion">
+              <div class="accordion-body" id="token-inputs">
+                <!-- Token inputs will be dynamically inserted here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <h5 class="my-4 mb-3">Sample Questions:</h5>
+      <div id="example-questions" class="list-group my-4"></div>
+
+      <label for="question" class="form-label">Enter your question:</label>
+      <input type="text" class="form-control" name="question" id="question" placeholder="Ask a question">
+
+    </form>
+
+    <div id="results" class="container my-3"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" type="module"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@gramex/ui@0.3/dist/dark-theme.js" type="module"></script>
+  <script src="script.js" type="module"></script>
+</body>
+
+</html>
