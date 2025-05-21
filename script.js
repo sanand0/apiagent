@@ -122,6 +122,7 @@ $taskForm.addEventListener("submit", async (e) => {
 
   const baseUrl = document.getElementById("baseUrlInput").value;
   const apiKey = document.getElementById("apiKeyInput").value;
+  const model = document.getElementById("model").value;
   const request = { method: "POST", headers: { "Content-Type": "application/json" } };
   if (apiKey) request.headers["Authorization"] = `Bearer ${apiKey}`;
   else request.credentials = "include";
@@ -134,7 +135,7 @@ $taskForm.addEventListener("submit", async (e) => {
     for await (const { content } of asyncLLM(`${baseUrl}/chat/completions`, {
       ...request,
       body: JSON.stringify({
-        model: "gpt-4.1-mini",
+        model,
         stream: true,
         messages: [{ role: "system", content: agentPrompt($systemPrompt.value) }, ...llmMessages],
       }),
@@ -184,7 +185,7 @@ $taskForm.addEventListener("submit", async (e) => {
     for await (const { content } of asyncLLM(`${baseUrl}/chat/completions`, {
       ...request,
       body: JSON.stringify({
-        model: "gpt-4.1-mini",
+        model,
         stream: true,
         messages: [{ role: "system", content: validatorPrompt }, ...validationMessages],
       }),
