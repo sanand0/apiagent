@@ -141,16 +141,22 @@ $taskForm.addEventListener("submit", async (e) => {
     let message = { role: "assistant", name: "developer", content: "" };
     messages.push(message);
 
-    for await (const { content } of asyncLLM(`${baseUrl}/chat/completions`, {
-      ...request,
-      body: JSON.stringify({
-        model,
-        stream: true,
-        messages: [{ role: "system", content: agentPrompt($systemPrompt.value) }, ...llmMessages],
-      }),
-    })) {
-      message.content = content;
-      if (content) renderSteps(messages);
+    try {
+      for await (const { content } of asyncLLM(`${baseUrl}/chat/completions`, {
+        ...request,
+        body: JSON.stringify({
+          model,
+          stream: true,
+          messages: [{ role: "system", content: agentPrompt($systemPrompt.value) }, ...llmMessages],
+        }),
+      })) {
+        message.content = content;
+        if (content) renderSteps(messages);
+      }
+    } catch (error) {
+      messages.push({ role: "user", name: "error", content: error.stack });
+      renderSteps(messages);
+      return;
     }
 
     if (message.content.includes("🟢")) {
