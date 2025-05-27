@@ -37,6 +37,22 @@ export const demos = [
     },
   },
   {
+    icon: "graph-up-arrow",
+    title: "Google Analytics",
+    description: "Explore your website traffic and user behavior with Google Analytics.",
+    prompt: "Use Google Analytics Data API to answer the question",
+    questions: [
+      "How many daily active users has your Android app had in the last week?",
+      "How many page views the top 10 pages on your site had in the last 28 days?",
+      "How many sessions the top 10 pages on your site had in the last 28 days?",
+    ],
+    token: {
+      label: "Google Analytics API token",
+      link: "https://developers.google.com/oauthplayground/",
+      required: true,
+    },
+  },
+  {
     icon: "book",
     title: "Crossref & OpenAlex API",
     description: "Search scholarly works, authors, journals, and more using Crossref and OpenAlex.",
