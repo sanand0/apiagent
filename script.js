@@ -24,6 +24,7 @@ marked.use({
 
 const $taskForm = document.querySelector("#task-form");
 const $results = document.querySelector("#results");
+const $status = document.querySelector("#status");
 const $apiCards = document.querySelector("#api-cards");
 const $exampleQuestions = document.querySelector("#example-questions");
 const $tokenInputs = document.querySelector("#token-inputs");
@@ -116,6 +117,12 @@ $exampleQuestions.addEventListener("click", (e) => {
   }
 });
 
+globalThis.customFetch = function (url, ...args) {
+  render(html`Fetching <a href="${url}" target="_blank" rel="noopener">${url}</a>`, $status);
+  $status.classList.remove("d-none");
+  return fetch(url, ...args);
+};
+
 $taskForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const question = e.target.question.value;
@@ -163,7 +170,7 @@ $taskForm.addEventListener("submit", async (e) => {
     })(message.content);
     let module;
     try {
-      const blob = new Blob([code], { type: "text/javascript" });
+      const blob = new Blob([`const fetch = globalThis.customFetch;\n${code}`], { type: "text/javascript" });
       module = await import(URL.createObjectURL(blob));
     } catch (error) {
       messages.push({ role: "user", name: "error", content: error.stack });
@@ -179,6 +186,7 @@ $taskForm.addEventListener("submit", async (e) => {
       messages.at(-1).name = "error";
       messages.at(-1).content = error.stack;
     }
+    $status.classList.add("d-none");
     renderSteps(messages);
 
     const validationMessages = [messages.at(0), messages.at(-2), messages.at(-1)];

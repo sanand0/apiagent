@@ -6,6 +6,7 @@ export const demos = [
     prompt: "Use GitHub API. Only if token is not empty, add Authorization: Bearer ${token}",
     questions: [
       "What are the most starred JavaScript repositories on GitHub?",
+      "What did @simonw do in the last few days?",
       "Who are the top contributors to the TensorFlow repository?",
       "What are the trending Python repositories this week?",
       "List the open issues in the React repository",
@@ -37,9 +38,13 @@ export const demos = [
   },
   {
     icon: "book",
-    title: "Crossref API",
-    description: "Search works, members, journals, and more on Crossref.",
-    prompt: `Use CrossRef API base URL: https://api.crossref.org/ - no authentication required.
+    title: "Crossref & OpenAlex API",
+    description: "Search scholarly works, authors, journals, and more using Crossref and OpenAlex.",
+    prompt: `Use CrossRef and/or OpenAlex API, no authentication required.
+
+# CrossRef API
+
+Base URL: https://api.crossref.org/
 
 Common Query Parameters:
 
@@ -92,6 +97,66 @@ Every JSON response is wrapped like:
 
 - Prefer \`cursor\` over \`offset\` to avoid expensive scans.
 - Use \`select=field1,field2\` to cut token cost when embedding records.
+
+# OpenAlex API
+
+Base URL: https://api.openalex.org/
+
+Common Parameters:
+
+- filter - Attribute:value pairs (e.g., \`publication_year:2023\`, \`authorships.institutions.ror:02mh96903\`, \`type:article\`, \`open_access.oa_status:gold\`, \`primary_location.source.publisher_lineage:P4310319865\`). Combine multiple with commas.
+- select - Comma-separated fields to return (e.g., \`select=id,doi,title,publication_year,cited_by_count\`).
+- search - Free-text search (e.g., \`search=climate+change\`). For specific fields: \`title.search:nanotechnology\`.
+- sort - Sort key(s) + optional “:desc” (works_count, cited_by_count, display_name, publication_date, relevance_score*)
+- group_by - Group results by a field and get counts (e.g., \`group_by=authorships.institutions.country_code\`).
+- sample - Random sample size (e.g., \`sample=10\`). Use with \`seed=<number>\` for reproducibility.
+- per-page - Page size (≤ 200; default 25)
+- page - Page number for pagination (default 1).
+- cursor - For deep paging, especially with \`/works\`. \`cursor=*\` first call → meta.next_cursor
+- mailto - Use root.node@gmail.com
+
+Endpoints (use OpenAlex IDs, DOIs, RORs, ORCIDs, ISSNs as appropriate):
+
+- GET /works - List works. Filters: \`publication_year\`, \`primary_location.source.id\` (for journal/repo), \`authorships.author.id\`, \`authorships.institutions.id\`, \`concepts.id\` (legacy), \`topics.id\`, \`grants.funder.id\`, \`open_access.oa_status\`, \`type\` (e.g. \`article\`, \`book-chapter\`, \`dataset\`). Output fields: \`id\`, \`doi\`, \`title\`, \`display_name\`, \`publication_year\`, \`publication_date\`, \`type\`, \`authorships\` (incl. \`author\`, \`institutions\`), \`primary_location\` (incl. \`source\`, \`license\`, \`is_oa\`, \`version\`), \`open_access\` (\`oa_status\`, \`oa_url\`), \`cited_by_count\`, \`referenced_works\`, \`related_works\`, \`topics\` (incl. \`id\`, \`display_name\`, \`score\`), \`grants\`.
+- GET /works/{id} - Get a single work by OpenAlex ID, DOI (e.g., \`doi:10.1234/example\`), PMID, or MAG ID.
+- GET /authors - List authors. Filters: \`display_name.search\`, \`last_known_institution.id\`, \`orcid\`, \`x_concepts.id\`. Output fields: \`id\`, \`orcid\`, \`display_name\`, \`display_name_alternatives\`, \`works_count\`, \`cited_by_count\`, \`last_known_institutions\`, \`x_concepts\`, \`summary_stats\` (incl. \`h_index\`, \`i10_index\`).
+- GET /authors/{id} - Get a single author by OpenAlex ID, ORCID, Scopus Author ID, MAG ID.
+- GET /sources - List sources (journals, repositories, etc.). Filters: \`display_name.search\`, \`issn\`, \`publisher_lineage\` (using publisher ID), \`type\` (e.g. \`journal\`, \`repository\`), \`is_oa\`. Output fields: \`id\`, \`issn_l\`, \`issn\`, \`display_name\`, \`type\`, \`publisher_lineage\` (publisher IDs), \`works_count\`, \`cited_by_count\`, \`is_oa\`, \`is_in_doaj\`.
+- GET /sources/{id} - Get a single source by OpenAlex ID, ISSN (e.g., \`issn:1234-5678\`), MAG ID.
+- GET /institutions - List institutions. Filters: \`display_name.search\`, \`ror\`, \`country_code\`, \`type\`. Output fields: \`id\`, \`ror\`, \`display_name\`, \`country_code\`, \`type\`, \`works_count\`, \`cited_by_count\`, \`associated_institutions\` (parent/child), \`geo\` (\`city\`, \`country\`).
+- GET /institutions/{id} - Get a single institution by OpenAlex ID, ROR, MAG ID.
+- GET /topics - List topics. Filters: \`display_name.search\`, \`domain.id\`, \`field.id\`, \`subfield.id\`. Output fields: \`id\`, \`display_name\`, \`description\`, \`domain\`, \`field\`, \`subfield\`, \`works_count\`, \`cited_by_count\`.
+- GET /topics/{id} - Get a single topic by OpenAlex ID or Wikidata ID.
+- GET /publishers - List publishers. Filters: \`display_name.search\`, \`country_codes\`, \`parent_publisher\`. Output fields: \`id\`, \`display_name\`, \`alternate_titles\`, \`country_codes\`, \`hierarchy_level\`, \`parent_publisher\`, \`works_count\`, \`cited_by_count\`, \`sources_api_url\`, \`ids\` (ror, wikidata).
+- GET /publishers/{id} - Get a single publisher by OpenAlex ID, ROR, Wikidata ID.
+- GET /funders - List funders. Filters: \`display_name.search\`, \`country_code\`. Output fields: \`id\`, \`ror\`, \`display_name\`, \`alternate_names\`, \`country_code\`, \`works_count\`, \`cited_by_count\`.
+- GET /funders/{id} - Get a single funder by OpenAlex ID, ROR, Wikidata ID.
+- GET /autocomplete/{entity_type}?q={search_term} - Fast typeahead search for entities.
+
+OpenAlex Response Structure (for lists):
+
+\`\`\`jsonc
+{
+  "meta": {
+    "count": 12345,
+    "db_response_time_ms": 50,
+    "page": 1,
+    "per_page": 25,
+    "next_cursor": "DwAAAXFuX2NhcmRNMV9EcFc1..."
+  },
+  "results": [ /* list of entity objects */ ],
+  "group_by": [
+    { "key": "gold", "key_display_name": "Gold", "count": 100 },
+    { "key": "green", "key_display_name": "Green", "count": 50 }
+  ]
+}
+\`\`\`
+Single entity responses return the object directly.
+
+- Use \`filter\` for precise criteria; \`search\` is for broader discovery.
+- Use \`select\` to return only needed fields, saving bandwidth and processing.
+- Use \`cursor\` for paginating through large result sets, especially for \`/works\`.
+
 `,
     questions: [
       "How many journal articles did Elsevier register in 2024?",
@@ -102,6 +167,11 @@ Every JSON response is wrapped like:
       "Which authors published five or more Elsevier papers but none with Wiley in 2024?",
       "How many 2024 retractions were recorded for Elsevier, Springer Nature, Wiley, Taylor & Francis and Sage?",
       "What share of outgoing references failed to resolve in Wiley vs Elsevier 2023 articles?",
+      "How many works published were published by German institutions in 2023, by institution type?",
+      "What kinds of work did the Bill & Melinda Gates Foundation fund in 2024?",
+      "What is the h-index distribution for authors primarily affiliated with Harvard University who published at least one paper in 2023?",
+      "Identify journals that published more than 50 articles on 'artificial intelligence' in 2023 and have a 2-year mean citedness (impact factor) greater than 5.",
+      "What percentage of works published by Elsevier (identify via CrossRef member ID) in 2023 are Gold Open Access according to OpenAlex?",
     ],
     token: {
       label: "Crossref API token",
@@ -156,11 +226,16 @@ export async function run(params) {
 \`\`\`
 
 The user will ALWAYS call \`result = await run({token})\` and share the result (or error).
-`;
+
+Do NOT forget to wrap in \`\`\`js ... \`\`\`
+
+Current time: ${new Date()}`;
 
 export const validatorPrompt = `The user asked a question. An LLM generated code and ran it. The output is below.
 
 If the result answers the question COMPLETELY, write the answer in plain English, formatted as Markdown.
 If not, tell the LLM the MOST LIKELY error and how to fix it. No code required.
 
-If and ONLY IF the LLM's result COMPLETELY answered the user's question, "🟢 DONE". Else say "🔴 REVISE".`;
+If and ONLY IF the LLM's result COMPLETELY answered the user's question, "🟢 DONE". Else say "🔴 REVISE".
+
+Current time: ${new Date()}`;
