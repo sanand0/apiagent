@@ -30,7 +30,7 @@ const $exampleQuestions = document.querySelector("#example-questions");
 const $tokenInputs = document.querySelector("#token-inputs");
 const $systemPrompt = document.querySelector("#system-prompt");
 
-const formState = saveform("#task-form");
+const formState = saveform("#task-form", { exclude: '[type="file"]' });
 
 // Render API cards based on config
 function renderApiCards() {

@@ -56,11 +56,13 @@ export const demos = [
     icon: "google",
     title: "Google Workspace",
     description: "Access Gmail, Calendar and Drive using Google APIs.",
-    prompt: "Use Google Workspace APIs. Send Authorization: Bearer ${token}",
+    prompt: "Use Google Workspace APIs. Send Authorization: Bearer ${token}. Max 5 concurrent requests.",
     questions: [
-      "List my unread Gmail messages",
+      "List my unread Gmail messages in the inbox",
       "What events do I have tomorrow?",
-      "Search Drive for files shared with me",
+      "Search Drive for files shared with me this month",
+      "What are the largest emails that I can delete?",
+      "Create a lunch meeting tomorrow at 12 noon for 30 minutes",
     ],
     token: {
       label: "Google OAuth token",
