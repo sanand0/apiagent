@@ -65,6 +65,7 @@ export const demos = [
     token: {
       label: "Google OAuth token",
       link: "https://developers.google.com/oauthplayground/",
+      name: "google",
       required: true,
       oauth: {
         provider: "google",

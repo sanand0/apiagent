@@ -95,6 +95,7 @@ function selectApi(index) {
           type="password"
           class="form-control"
           id="token"
+          name="${selectedApi.token.name || 'token'}"
           placeholder="Enter ${selectedApi.token.label}"
           ${selectedApi.token.required ? "required" : ""}
         />
@@ -107,6 +108,7 @@ function selectApi(index) {
 
   // Update system prompt
   $systemPrompt.value = selectedApi.prompt;
+  $systemPrompt.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
 async function initOAuth(config) {
@@ -125,7 +127,9 @@ async function initOAuth(config) {
       client_id: config.clientId,
       scope: config.scope,
       callback: (resp) => {
-        document.getElementById("token").value = resp.access_token;
+        const input = document.getElementById("token");
+        input.value = resp.access_token;
+        input.dispatchEvent(new Event("change", { bubbles: true }));
       },
     });
     button.addEventListener("click", () => tokenClient.requestAccessToken());
@@ -139,6 +143,7 @@ $exampleQuestions.addEventListener("click", (e) => {
     const $question = document.querySelector("#question");
     $question.value = $exampleQuestion.textContent;
     $question.dispatchEvent(new Event("input", { bubbles: true }));
+    $question.dispatchEvent(new Event("change", { bubbles: true }));
     $taskForm.dispatchEvent(new Event("submit", { bubbles: true }));
   }
 });
