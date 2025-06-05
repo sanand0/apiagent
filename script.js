@@ -98,7 +98,7 @@ function selectApi(index) {
           type="password"
           class="form-control"
           id="token"
-          name="${selectedApi.token.name || "token"}"
+          name="token-${selectedApi.title}"
           placeholder="Enter ${selectedApi.token.label}"
           ${selectedApi.token.required ? "required" : ""}
         />
