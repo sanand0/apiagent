@@ -109,8 +109,17 @@ function selectApi(index) {
   $systemPrompt.value = selectedApi.prompt;
 }
 
-function initOAuth(config) {
+async function initOAuth(config) {
   if (config.provider === "google") {
+    if (!window.google || !google.accounts) {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://accounts.google.com/gsi/client";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
     const button = document.getElementById("oauth-button");
     const tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: config.clientId,
