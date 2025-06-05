@@ -7,12 +7,12 @@ API Agent is an interactive web application that allows users to query APIs thro
 ## Features
 
 - **Natural Language Interface**: Ask questions in plain English to interact with APIs
-- **Multiple API Support**: Connect to GitHub, StackOverflow, Jira, and more
+- **Multiple API Support**: Connect to GitHub, StackOverflow, Google Workspace, Jira, and more
 - **Real-time Data**: Access up-to-date information from various platforms
 - **Code Generation**: Automatically generates and executes JavaScript code for API calls
 - **Result Validation**: Verifies that the results answer the original question
 - **Dark/Light Mode**: Supports theme switching for comfortable viewing
-- **Token Management**: Securely store API tokens for authenticated requests
+- **Token Management**: Securely store API and OAuth tokens for authenticated requests
 
 ## Usage
 
@@ -31,6 +31,8 @@ API Agent is an interactive web application that allows users to query APIs thro
 - Who are the top contributors to the TensorFlow repository?
 - What are the trending Python repositories this week?
 - What are the most upvoted JavaScript questions on StackOverflow?
+- List my unread Gmail messages
+- What events do I have tomorrow?
 
 ## Setup
 
@@ -40,6 +42,7 @@ API Agent is an interactive web application that allows users to query APIs thro
 - API tokens (optional, but recommended for higher rate limits):
   - [GitHub Token](https://github.com/settings/tokens)
   - [StackOverflow Token](https://stackapps.com/apps/oauth/register)
+  - [Google OAuth Token](https://developers.google.com/oauthplayground/)
   - [Jira Token](https://id.atlassian.com/manage-profile/security/api-tokens)
 
 ### Local Setup

@@ -30,7 +30,7 @@ const $exampleQuestions = document.querySelector("#example-questions");
 const $tokenInputs = document.querySelector("#token-inputs");
 const $systemPrompt = document.querySelector("#system-prompt");
 
-saveform("#task-form");
+const formState = saveform("#task-form");
 
 // Render API cards based on config
 function renderApiCards() {
@@ -85,15 +85,20 @@ function selectApi(index) {
     html`
       <div class="mb-2">
         <label for="token" class="form-label d-flex justify-content-between">
-          ${selectedApi.token.label} ${selectedApi.token.required ? html`<span class="text-danger">*</span>` : ""}
-          <a href="${selectedApi.token.link}" target="_blank" rel="noopener"
-            >Get token <i class="bi bi-box-arrow-up-right"></i
-          ></a>
+          <span>
+            ${selectedApi.token.label} ${selectedApi.token.required ? html`<span class="text-danger">*</span>` : ""}
+          </span>
+          ${selectedApi.token.oauth
+            ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button">Sign in</button>`
+            : html`<a href="${selectedApi.token.link}" target="_blank" rel="noopener"
+                >Get token <i class="bi bi-box-arrow-up-right"></i
+              ></a>`}
         </label>
         <input
           type="password"
           class="form-control"
           id="token"
+          name="${selectedApi.token.name || "token"}"
           placeholder="Enter ${selectedApi.token.label}"
           ${selectedApi.token.required ? "required" : ""}
         />
@@ -102,8 +107,38 @@ function selectApi(index) {
     $tokenInputs
   );
 
+  formState.restore();
+
+  if (selectedApi.token.oauth) initOAuth(selectedApi.token.oauth);
+
   // Update system prompt
   $systemPrompt.value = selectedApi.prompt;
+  $systemPrompt.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+async function initOAuth(config) {
+  if (config.provider === "google") {
+    if (!window.google || !google.accounts) {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://accounts.google.com/gsi/client";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+    const button = document.getElementById("oauth-button");
+    const tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: config.clientId,
+      scope: config.scope,
+      callback: (resp) => {
+        const input = document.getElementById("token");
+        input.value = resp.access_token;
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      },
+    });
+    button.addEventListener("click", () => tokenClient.requestAccessToken());
+  }
 }
 
 // Add event listeners to example questions
@@ -112,7 +147,7 @@ $exampleQuestions.addEventListener("click", (e) => {
   if ($exampleQuestion) {
     const $question = document.querySelector("#question");
     $question.value = $exampleQuestion.textContent;
-    $question.dispatchEvent(new Event("input", { bubbles: true }));
+    $question.dispatchEvent(new Event("change", { bubbles: true }));
     $taskForm.dispatchEvent(new Event("submit", { bubbles: true }));
   }
 });
