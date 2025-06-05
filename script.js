@@ -30,7 +30,7 @@ const $exampleQuestions = document.querySelector("#example-questions");
 const $tokenInputs = document.querySelector("#token-inputs");
 const $systemPrompt = document.querySelector("#system-prompt");
 
-saveform("#task-form");
+const formState = saveform("#task-form");
 
 // Render API cards based on config
 function renderApiCards() {
@@ -85,8 +85,10 @@ function selectApi(index) {
     html`
       <div class="mb-2">
         <label for="token" class="form-label d-flex justify-content-between">
-          ${selectedApi.token.label}
-          ${selectedApi.token.required ? html`<span class="text-danger">*</span>` : ""}
+          <span>
+            ${selectedApi.token.label}
+            ${selectedApi.token.required ? html`<span class="text-danger">*</span>` : ""}
+          </span>
           ${selectedApi.token.oauth
             ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button">Sign in</button>`
             : html`<a href="${selectedApi.token.link}" target="_blank" rel="noopener">Get token <i class="bi bi-box-arrow-up-right"></i></a>`}
@@ -103,6 +105,8 @@ function selectApi(index) {
     `,
     $tokenInputs
   );
+
+  formState.restore();
 
   if (selectedApi.token.oauth) initOAuth(selectedApi.token.oauth);
 
