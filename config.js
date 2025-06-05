@@ -71,8 +71,7 @@ export const demos = [
         provider: "google",
         // root.node@gmail.com | Project: Personal mail etc. OAuth Client: Web apps
         // https://console.cloud.google.com/auth/clients/872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleusercontent.com?inv=1&invt=AbzTOQ&project=encoded-ensign-221
-        clientId:
-          "872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleusercontent.com",
+        clientId: "872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleusercontent.com",
         scope:
           "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/drive.readonly",
       },

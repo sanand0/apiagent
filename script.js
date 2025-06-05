@@ -86,18 +86,19 @@ function selectApi(index) {
       <div class="mb-2">
         <label for="token" class="form-label d-flex justify-content-between">
           <span>
-            ${selectedApi.token.label}
-            ${selectedApi.token.required ? html`<span class="text-danger">*</span>` : ""}
+            ${selectedApi.token.label} ${selectedApi.token.required ? html`<span class="text-danger">*</span>` : ""}
           </span>
           ${selectedApi.token.oauth
             ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button">Sign in</button>`
-            : html`<a href="${selectedApi.token.link}" target="_blank" rel="noopener">Get token <i class="bi bi-box-arrow-up-right"></i></a>`}
+            : html`<a href="${selectedApi.token.link}" target="_blank" rel="noopener"
+                >Get token <i class="bi bi-box-arrow-up-right"></i
+              ></a>`}
         </label>
         <input
           type="password"
           class="form-control"
           id="token"
-          name="${selectedApi.token.name || 'token'}"
+          name="${selectedApi.token.name || "token"}"
           placeholder="Enter ${selectedApi.token.label}"
           ${selectedApi.token.required ? "required" : ""}
         />
@@ -146,7 +147,6 @@ $exampleQuestions.addEventListener("click", (e) => {
   if ($exampleQuestion) {
     const $question = document.querySelector("#question");
     $question.value = $exampleQuestion.textContent;
-    $question.dispatchEvent(new Event("input", { bubbles: true }));
     $question.dispatchEvent(new Event("change", { bubbles: true }));
     $taskForm.dispatchEvent(new Event("submit", { bubbles: true }));
   }
