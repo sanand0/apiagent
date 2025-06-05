@@ -85,10 +85,11 @@ function selectApi(index) {
     html`
       <div class="mb-2">
         <label for="token" class="form-label d-flex justify-content-between">
-          ${selectedApi.token.label} ${selectedApi.token.required ? html`<span class="text-danger">*</span>` : ""}
-          <a href="${selectedApi.token.link}" target="_blank" rel="noopener"
-            >Get token <i class="bi bi-box-arrow-up-right"></i
-          ></a>
+          ${selectedApi.token.label}
+          ${selectedApi.token.required ? html`<span class="text-danger">*</span>` : ""}
+          ${selectedApi.token.oauth
+            ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button">Sign in</button>`
+            : html`<a href="${selectedApi.token.link}" target="_blank" rel="noopener">Get token <i class="bi bi-box-arrow-up-right"></i></a>`}
         </label>
         <input
           type="password"
@@ -102,8 +103,24 @@ function selectApi(index) {
     $tokenInputs
   );
 
+  if (selectedApi.token.oauth) initOAuth(selectedApi.token.oauth);
+
   // Update system prompt
   $systemPrompt.value = selectedApi.prompt;
+}
+
+function initOAuth(config) {
+  if (config.provider === "google") {
+    const button = document.getElementById("oauth-button");
+    const tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: config.clientId,
+      scope: config.scope,
+      callback: (resp) => {
+        document.getElementById("token").value = resp.access_token;
+      },
+    });
+    button.addEventListener("click", () => tokenClient.requestAccessToken());
+  }
 }
 
 // Add event listeners to example questions

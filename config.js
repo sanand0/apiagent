@@ -53,6 +53,28 @@ export const demos = [
     },
   },
   {
+    icon: "google",
+    title: "Google Workspace",
+    description: "Access Gmail, Calendar and Drive using Google APIs.",
+    prompt: "Use Google Workspace APIs. Send Authorization: Bearer ${token}",
+    questions: [
+      "List my unread Gmail messages",
+      "What events do I have tomorrow?",
+      "Search Drive for files shared with me",
+    ],
+    token: {
+      label: "Google OAuth token",
+      link: "https://developers.google.com/oauthplayground/",
+      required: true,
+      oauth: {
+        provider: "google",
+        clientId: "YOUR_GOOGLE_CLIENT_ID",
+        scope:
+          "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/drive.readonly",
+      },
+    },
+  },
+  {
     icon: "book",
     title: "Crossref & OpenAlex API",
     description: "Search scholarly works, authors, journals, and more using Crossref and OpenAlex.",
