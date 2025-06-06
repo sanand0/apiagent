@@ -138,6 +138,10 @@
                     <option value="o4-mini"></option>
                   </datalist>
                 </div>
+                <div class="mb-3">
+                  <label for="attempts" class="form-label">Number of retry attempts:</label>
+                  <input type="number" class="form-control" id="attempts" value="3">
+                </div>
               </div>
             </div>
           </div>
@@ -160,13 +164,13 @@
       <h5 class="my-4 mb-3">Sample Questions:</h5>
       <div id="example-questions" class="list-group my-4"></div>
 
+      <div id="results" class="mx-auto my-3 narrative"></div>
+      <div id="status" class="alert alert-info mx-auto my-3 narrative d-none" role="alert"></div>
+
       <label for="question" class="form-label">Enter your question:</label>
       <input type="text" class="form-control" name="question" id="question" placeholder="Ask a question">
       <button type="submit" class="btn btn-primary mt-2">Submit</button>
     </form>
-
-    <div id="results" class="mx-auto my-3 narrative"></div>
-    <div id="status" class="alert alert-info mx-auto my-3 narrative d-none" role="alert"></div>
 
     <footer style="height: 50vh"></footer>
   </div>

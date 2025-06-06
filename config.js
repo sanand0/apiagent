@@ -241,11 +241,15 @@ Single entity responses return the object directly.
   },
 ];
 
-export const agentPrompt = (apiInfo) => `You are an JavaScript developer.
+// now() returns the current time to the nearest 10 minutes
+const now = () => new Date().toISOString().slice(0, -9) + "0:00.000Z";
 
-1. A user asked you a question (first message)
-2. Write browser JS code to solve it using API-DETAILS below.
-3. There may be additional messages that contain output and feedback. If so, rewrite the code to solve it.
+export const agentPrompt = (apiInfo) => `You are an JavaScript developer following this loop:
+
+1. A user asks a question.
+2. You write browser JS code to solve it using API-DETAILS below.
+3. User runs your output and passes that along with LLM feedback. If needed, rewrite the code to solve it.
+4. The user may have follow-up questions. Interpret the latest question in context and go back to step 2.
 
 # API Details
 
@@ -271,13 +275,11 @@ The user will ALWAYS call \`result = await run({token})\` and share the result (
 
 Do NOT forget to wrap in \`\`\`js ... \`\`\`
 
-Current time: ${new Date()}`;
+Current time (UTC): ${now()}`;
 
-export const validatorPrompt = `The user asked a question. An LLM generated code and ran it. The output is below.
+export const validatorPrompt = `The user asked one or more questions. An LLM generated code and ran it. The output of the last step is below.
 
-If the result answers the question COMPLETELY, write the answer in plain English, formatted as Markdown.
-If not, tell the LLM the MOST LIKELY error and how to fix it. No code required.
+If and ONLY IF the result answers the last question COMPLETELY, explain the answer in plain English, formatted as Markdown. Then say "🟢 DONE".
+If not, say "🔴 REVISE" and explain the MOST LIKELY error and how to fix it. No code required.
 
-If and ONLY IF the LLM's result COMPLETELY answered the user's question, "🟢 DONE". Else say "🔴 REVISE".
-
-Current time: ${new Date()}`;
+Current time (UTC): ${now()}`;

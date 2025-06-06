@@ -31,6 +31,7 @@ const $tokenInputs = document.querySelector("#token-inputs");
 const $systemPrompt = document.querySelector("#system-prompt");
 
 const formState = saveform("#task-form", { exclude: '[type="file"]' });
+const messages = [];
 
 // Render API cards based on config
 function renderApiCards() {
@@ -114,6 +115,9 @@ function selectApi(index) {
   // Update system prompt
   $systemPrompt.value = selectedApi.prompt;
   $systemPrompt.dispatchEvent(new Event("change", { bubbles: true }));
+
+  messages.splice(0, messages.length);
+  renderSteps(messages);
 }
 
 async function initOAuth(config) {
@@ -161,17 +165,18 @@ globalThis.customFetch = function (url, ...args) {
 $taskForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const question = e.target.question.value;
-  const messages = [{ role: "user", name: "user", content: question }];
+  messages.push({ role: "user", name: "user", content: question });
   renderSteps(messages);
 
   const baseUrl = document.getElementById("baseUrlInput").value;
   const apiKey = document.getElementById("apiKeyInput").value;
   const model = document.getElementById("model").value;
+  const attempts = document.getElementById("attempts").value;
   const request = { method: "POST", headers: { "Content-Type": "application/json" } };
   if (apiKey) request.headers["Authorization"] = `Bearer ${apiKey}`;
   else request.credentials = "include";
 
-  for (let attempt = 0; attempt < 5; attempt++) {
+  for (let attempt = 0; attempt < attempts; attempt++) {
     const llmMessages = [...messages];
     let message = { role: "assistant", name: "developer", content: "" };
     messages.push(message);
@@ -230,7 +235,7 @@ $taskForm.addEventListener("submit", async (e) => {
     $status.classList.add("d-none");
     renderSteps(messages);
 
-    const validationMessages = [messages.at(0), messages.at(-2), messages.at(-1)];
+    const validationMessages = [...messages.filter((m) => m.name === "user"), messages.at(-2), messages.at(-1)];
     let validationMessage = { role: "assistant", name: "validator", content: "" };
     messages.push(validationMessage);
     for await (const { content } of asyncLLM(`${baseUrl}/chat/completions`, {
