@@ -138,6 +138,10 @@
                     <option value="o4-mini"></option>
                   </datalist>
                 </div>
+                <div class="mb-3">
+                  <label for="max-turns" class="form-label">Max turns:</label>
+                  <input type="number" class="form-control" id="max-turns" value="5" min="1">
+                </div>
               </div>
             </div>
           </div>
@@ -167,6 +171,9 @@
 
     <div id="results" class="mx-auto my-3 narrative"></div>
     <div id="status" class="alert alert-info mx-auto my-3 narrative d-none" role="alert"></div>
+    <div id="continue-container" class="text-center my-3 d-none">
+      <button id="continue-button" class="btn btn-secondary">Continue</button>
+    </div>
 
     <footer style="height: 50vh"></footer>
   </div>

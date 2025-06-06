@@ -25,10 +25,18 @@ marked.use({
 const $taskForm = document.querySelector("#task-form");
 const $results = document.querySelector("#results");
 const $status = document.querySelector("#status");
+const $continueContainer = document.querySelector("#continue-container");
+const $continueButton = document.querySelector("#continue-button");
 const $apiCards = document.querySelector("#api-cards");
 const $exampleQuestions = document.querySelector("#example-questions");
 const $tokenInputs = document.querySelector("#token-inputs");
 const $systemPrompt = document.querySelector("#system-prompt");
+const $maxTurns = document.querySelector("#max-turns");
+
+let messages = [];
+let attempt = 0;
+let maxTurns = 5;
+let baseUrl, apiKey, model, request;
 
 const formState = saveform("#task-form", { exclude: '[type="file"]' });
 
@@ -160,93 +168,114 @@ globalThis.customFetch = function (url, ...args) {
 
 $taskForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const question = e.target.question.value;
-  const messages = [{ role: "user", name: "user", content: question }];
+  attempt = 0;
+  maxTurns = parseInt($maxTurns.value) || 5;
+  messages = [{ role: "user", name: "user", content: e.target.question.value }];
   renderSteps(messages);
+  $continueContainer.classList.add("d-none");
 
-  const baseUrl = document.getElementById("baseUrlInput").value;
-  const apiKey = document.getElementById("apiKeyInput").value;
-  const model = document.getElementById("model").value;
-  const request = { method: "POST", headers: { "Content-Type": "application/json" } };
+  baseUrl = document.getElementById("baseUrlInput").value;
+  apiKey = document.getElementById("apiKeyInput").value;
+  model = document.getElementById("model").value;
+  request = { method: "POST", headers: { "Content-Type": "application/json" } };
   if (apiKey) request.headers["Authorization"] = `Bearer ${apiKey}`;
   else request.credentials = "include";
 
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const llmMessages = [...messages];
-    let message = { role: "assistant", name: "developer", content: "" };
-    messages.push(message);
+  await runTurns(maxTurns);
+});
 
-    try {
-      for await (const { content } of asyncLLM(`${baseUrl}/chat/completions`, {
-        ...request,
-        body: JSON.stringify({
-          model,
-          stream: true,
-          messages: [{ role: "system", content: agentPrompt($systemPrompt.value) }, ...llmMessages],
-        }),
-      })) {
-        message.content = content;
-        if (content) renderSteps(messages);
-      }
-    } catch (error) {
-      messages.push({ role: "user", name: "error", content: error.stack });
-      renderSteps(messages);
+async function runTurns(count) {
+  for (let i = 0; i < count; i++) {
+    const done = await runAttempt();
+    attempt++;
+    if (done) {
+      $continueContainer.classList.add("d-none");
       return;
     }
-
-    if (message.content.includes("🟢")) {
-      renderSteps(messages);
+    if (attempt >= maxTurns) {
+      $continueContainer.classList.remove("d-none");
       return;
     }
+  }
+}
 
-    // Extract the code inside ```js in the last step
-    const code = ((content) => {
-      try {
-        return [...content.matchAll(/```js(.*?)```/gs)][0].at(-1);
-      } catch (error) {
-        messages.push({ role: "user", name: "error", content: "No JS code block to run" });
-        renderSteps(messages);
-        return;
-      }
-    })(message.content);
-    let module;
-    try {
-      const blob = new Blob([`const fetch = globalThis.customFetch;\n${code}`], { type: "text/javascript" });
-      module = await import(URL.createObjectURL(blob));
-    } catch (error) {
-      messages.push({ role: "user", name: "error", content: error.stack });
-      renderSteps(messages);
-      return;
-    }
-    messages.push({ role: "user", name: "result", content: "Running code..." });
-    renderSteps(messages);
-    try {
-      const result = await module.run({ token: document.getElementById("token")?.value || "" });
-      messages.at(-1).content = JSON.stringify(result, null, 2);
-    } catch (error) {
-      messages.at(-1).name = "error";
-      messages.at(-1).content = error.stack;
-    }
-    $status.classList.add("d-none");
-    renderSteps(messages);
+$continueButton.addEventListener("click", () => runTurns(1));
 
-    const validationMessages = [messages.at(0), messages.at(-2), messages.at(-1)];
-    let validationMessage = { role: "assistant", name: "validator", content: "" };
-    messages.push(validationMessage);
+async function runAttempt() {
+  const llmMessages = [...messages];
+  let message = { role: "assistant", name: "developer", content: "" };
+  messages.push(message);
+
+  try {
     for await (const { content } of asyncLLM(`${baseUrl}/chat/completions`, {
       ...request,
       body: JSON.stringify({
         model,
         stream: true,
-        messages: [{ role: "system", content: validatorPrompt }, ...validationMessages],
+        messages: [{ role: "system", content: agentPrompt($systemPrompt.value) }, ...llmMessages],
       }),
     })) {
-      validationMessage.content = content;
+      message.content = content;
       if (content) renderSteps(messages);
     }
-    if (validationMessage.content.includes("🟢")) return;
+  } catch (error) {
+    messages.push({ role: "user", name: "error", content: error.stack });
+    renderSteps(messages);
+    return true;
   }
-});
+
+  if (message.content.includes("🟢")) {
+    renderSteps(messages);
+    return true;
+  }
+
+  const code = ((content) => {
+    try {
+      return [...content.matchAll(/```js(.*?)```/gs)][0].at(-1);
+    } catch (error) {
+      messages.push({ role: "user", name: "error", content: "No JS code block to run" });
+      renderSteps(messages);
+      return null;
+    }
+  })(message.content);
+  if (!code) return true;
+  let module;
+  try {
+    const blob = new Blob([`const fetch = globalThis.customFetch;\n${code}`], { type: "text/javascript" });
+    module = await import(URL.createObjectURL(blob));
+  } catch (error) {
+    messages.push({ role: "user", name: "error", content: error.stack });
+    renderSteps(messages);
+    return true;
+  }
+  messages.push({ role: "user", name: "result", content: "Running code..." });
+  renderSteps(messages);
+  try {
+    const result = await module.run({ token: document.getElementById("token")?.value || "" });
+    messages.at(-1).content = JSON.stringify(result, null, 2);
+  } catch (error) {
+    messages.at(-1).name = "error";
+    messages.at(-1).content = error.stack;
+  }
+  $status.classList.add("d-none");
+  renderSteps(messages);
+
+  const validationMessages = [messages.at(0), messages.at(-2), messages.at(-1)];
+  let validationMessage = { role: "assistant", name: "validator", content: "" };
+  messages.push(validationMessage);
+  for await (const { content } of asyncLLM(`${baseUrl}/chat/completions`, {
+    ...request,
+    body: JSON.stringify({
+      model,
+      stream: true,
+      messages: [{ role: "system", content: validatorPrompt }, ...validationMessages],
+    }),
+  })) {
+    validationMessage.content = content;
+    if (content) renderSteps(messages);
+  }
+  return validationMessage.content.includes("🟢");
+}
 
 // Define icon and color based on name
 const iconMap = {
