@@ -29,6 +29,11 @@ const $apiCards = document.querySelector("#api-cards");
 const $exampleQuestions = document.querySelector("#example-questions");
 const $tokenInputs = document.querySelector("#token-inputs");
 const $systemPrompt = document.querySelector("#system-prompt");
+const $continueButton = document.querySelector("#continueButton");
+
+let messages = [];
+let requestConfig = {};
+// let attemptNumber = 0; // For logging current attempt - REMOVED
 
 const formState = saveform("#task-form", { exclude: '[type="file"]' });
 
@@ -148,7 +153,7 @@ $exampleQuestions.addEventListener("click", (e) => {
     const $question = document.querySelector("#question");
     $question.value = $exampleQuestion.textContent;
     $question.dispatchEvent(new Event("change", { bubbles: true }));
-    $taskForm.dispatchEvent(new Event("submit", { bubbles: true }));
+    // $taskForm.dispatchEvent(new Event("submit", { bubbles: true })); // Auto-submit removed for clarity
   }
 });
 
@@ -161,54 +166,108 @@ globalThis.customFetch = function (url, ...args) {
 $taskForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const question = e.target.question.value;
-  const messages = [{ role: "user", name: "user", content: question }];
+  messages = [{ role: "user", name: "user", content: question }]; // Initialize/reset messages
   renderSteps(messages);
+  $continueButton.classList.add("d-none"); // Hide continue button on new submission
 
-  const baseUrl = document.getElementById("baseUrlInput").value;
-  const apiKey = document.getElementById("apiKeyInput").value;
-  const model = document.getElementById("model").value;
-  const request = { method: "POST", headers: { "Content-Type": "application/json" } };
-  if (apiKey) request.headers["Authorization"] = `Bearer ${apiKey}`;
-  else request.credentials = "include";
+  // attemptNumber = 0; // Reset attempt counter for new submission - REMOVED
 
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const llmMessages = [...messages];
-    let message = { role: "assistant", name: "developer", content: "" };
-    messages.push(message);
+  requestConfig = { // Initialize/reset requestConfig
+    baseUrl: document.getElementById("baseUrlInput").value,
+    apiKey: document.getElementById("apiKeyInput").value,
+    model: document.getElementById("model").value,
+    maxAttempts: document.getElementById("maxAttemptsInput").valueAsNumber,
+    baseRequest: { method: "POST", headers: { "Content-Type": "application/json" } },
+  };
+  // console.log('Max attempts from settings:', requestConfig.maxAttempts); // Log n value - REMOVED
+  if (requestConfig.apiKey) requestConfig.baseRequest.headers["Authorization"] = `Bearer ${requestConfig.apiKey}`;
+  else requestConfig.baseRequest.credentials = "include";
 
+  for (let i = 0; i < requestConfig.maxAttempts; i++) {
+    // attemptNumber++; // REMOVED
+    const isDone = await performAttempt();
+    if (isDone) return;
+  }
+
+  // If loop finishes and not done, show continue button
+  if (!messages.some(msg => msg.content?.includes("🟢"))) {
+    // console.log('Showing Continue button.'); // Log before showing button - REMOVED
+    $continueButton.classList.remove("d-none");
+  }
+});
+
+$continueButton.addEventListener("click", async () => {
+  // console.log('Continue button clicked. Performing one more attempt.'); // Log continue click - REMOVED
+  $continueButton.classList.add("d-none"); // Hide button during attempt
+  // attemptNumber++; // REMOVED
+  const isDone = await performAttempt();
+  if (!isDone && !messages.some(msg => msg.content?.includes("🟢"))) {
+    $continueButton.classList.remove("d-none"); // Show again if not done
+  }
+});
+
+async function performAttempt() {
+  // console.log('Performing attempt number:', currentAttemptForLog); // Log current attempt number - REMOVED
+
+  // ---- MOCKING FOR TESTING ----
+  // To simulate task always not complete (for testing continue button appearance):
+  // return false;
+  // To simulate task completion after N initial attempts + 1 continue click:
+  // if (currentAttemptForLog > requestConfig.maxAttempts) { // currentAttemptForLog is no longer available
+  //   console.log(`Simulating task completion`);
+  //   messages.push({ role: "assistant", name: "validator", content: "🟢 DONE (Simulated)" });
+  //   renderSteps(messages);
+  //   return true;
+  // }
+  // ---- END MOCKING ----
+
+  const { baseUrl, model, baseRequest } = requestConfig;
+  const llmMessages = [...messages]; // Use a copy for this attempt's LLM call
+  let message = { role: "assistant", name: "developer", content: "" };
+  messages.push(message);
+
+  try {
+    for await (const { content } of asyncLLM(`${baseUrl}/chat/completions`, {
+      ...baseRequest,
+      body: JSON.stringify({
+        model,
+        stream: true,
+        messages: [{ role: "system", content: agentPrompt($systemPrompt.value) }, ...llmMessages],
+      }),
+    })) {
+      message.content = content;
+      if (content) renderSteps(messages);
+    }
+  } catch (error) {
+    messages.push({ role: "user", name: "error", content: error.stack });
+    renderSteps(messages);
+    return true; // Stop further attempts on error
+  }
+
+  if (message.content.includes("🟢")) {
+    renderSteps(messages);
+    return true; // Task is done
+  }
+
+  // Extract the code inside ```js in the last step
+  const code = ((content) => {
     try {
-      for await (const { content } of asyncLLM(`${baseUrl}/chat/completions`, {
-        ...request,
-        body: JSON.stringify({
-          model,
-          stream: true,
-          messages: [{ role: "system", content: agentPrompt($systemPrompt.value) }, ...llmMessages],
-        }),
-      })) {
-        message.content = content;
-        if (content) renderSteps(messages);
-      }
+      return [...content.matchAll(/```js(.*?)```/gs)][0].at(-1);
     } catch (error) {
-      messages.push({ role: "user", name: "error", content: error.stack });
-      renderSteps(messages);
-      return;
+      // No code block found, not necessarily an error for the whole process
+      // But we can't proceed with this attempt if no code is generated.
+      // Depending on desired behavior, could push an error message or let validator handle it.
+      // For now, let's assume validator will catch this if it's an issue.
+      return null;
     }
+  })(message.content);
 
-    if (message.content.includes("🟢")) {
-      renderSteps(messages);
-      return;
-    }
-
-    // Extract the code inside ```js in the last step
-    const code = ((content) => {
-      try {
-        return [...content.matchAll(/```js(.*?)```/gs)][0].at(-1);
-      } catch (error) {
-        messages.push({ role: "user", name: "error", content: "No JS code block to run" });
-        renderSteps(messages);
-        return;
-      }
-    })(message.content);
+  if (code === null) {
+    // If no code, let validator decide if it's an issue or if the text response is enough.
+    // We will still proceed to validation.
+    messages.push({ role: "user", name: "result", content: "No code block found to execute. Proceeding to validation." });
+    renderSteps(messages);
+  } else {
     let module;
     try {
       const blob = new Blob([`const fetch = globalThis.customFetch;\n${code}`], { type: "text/javascript" });
@@ -216,7 +275,7 @@ $taskForm.addEventListener("submit", async (e) => {
     } catch (error) {
       messages.push({ role: "user", name: "error", content: error.stack });
       renderSteps(messages);
-      return;
+      return true; // Stop further attempts on error
     }
     messages.push({ role: "user", name: "result", content: "Running code..." });
     renderSteps(messages);
@@ -226,15 +285,24 @@ $taskForm.addEventListener("submit", async (e) => {
     } catch (error) {
       messages.at(-1).name = "error";
       messages.at(-1).content = error.stack;
+      // Do not return true here, let validator assess the error.
     }
-    $status.classList.add("d-none");
-    renderSteps(messages);
+  }
+  $status.classList.add("d-none");
+  renderSteps(messages);
 
-    const validationMessages = [messages.at(0), messages.at(-2), messages.at(-1)];
-    let validationMessage = { role: "assistant", name: "validator", content: "" };
-    messages.push(validationMessage);
+  // Determine messages for validation: original user query, last assistant (developer) message, and result/error from code execution.
+  const validationMessages = [messages[0]]; // User's initial question
+  const lastDevMessage = messages.slice().reverse().find(m => m.name === 'developer');
+  if (lastDevMessage) validationMessages.push(lastDevMessage);
+  const lastResultMessage = messages.slice().reverse().find(m => m.name === 'result' || m.name === 'error');
+  if (lastResultMessage) validationMessages.push(lastResultMessage);
+
+  let validationMessage = { role: "assistant", name: "validator", content: "" };
+  messages.push(validationMessage);
+  try {
     for await (const { content } of asyncLLM(`${baseUrl}/chat/completions`, {
-      ...request,
+      ...baseRequest,
       body: JSON.stringify({
         model,
         stream: true,
@@ -244,9 +312,18 @@ $taskForm.addEventListener("submit", async (e) => {
       validationMessage.content = content;
       if (content) renderSteps(messages);
     }
-    if (validationMessage.content.includes("🟢")) return;
+  } catch (error) {
+    messages.push({ role: "user", name: "error", content: `Validator LLM Error: ${error.stack}` });
+    renderSteps(messages);
+    return true; // Stop further attempts on validator error
   }
-});
+
+  if (validationMessage.content.includes("🟢")) {
+    return true; // Task is done
+  }
+
+  return false; // Task is not done
+}
 
 // Define icon and color based on name
 const iconMap = {
