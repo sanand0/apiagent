@@ -291,7 +291,7 @@ Single entity responses return the object directly.
     ],
     token: {
       label: "OpenRouter API key",
-      link: "https://openrouter.ai/account/api-keys",
+      link: "https://openrouter.ai/settings/keys",
       required: true,
       key: "openrouter",
     },
