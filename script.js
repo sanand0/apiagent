@@ -49,9 +49,9 @@ function renderApiCards() {
             </div>
           </div>
         </div>
-      `
+      `,
     ),
-    $apiCards
+    $apiCards,
   );
 
   // Add event listeners to API cards
@@ -79,10 +79,13 @@ function updateSelection() {
   });
 
   render(
-    apis.flatMap((api) => api.questions).map(
-      (q) => html`<button type="button" class="list-group-item list-group-item-action example-question">${q}</button>`
-    ),
-    $exampleQuestions
+    apis
+      .flatMap((api) => api.questions)
+      .map(
+        (q) =>
+          html`<button type="button" class="list-group-item list-group-item-action example-question">${q}</button>`,
+      ),
+    $exampleQuestions,
   );
 
   render(
@@ -92,20 +95,31 @@ function updateSelection() {
           <label for="token-${i}" class="form-label d-flex justify-content-between">
             <span>${api.token.label}${api.token.required ? html`<span class="text-danger">*</span>` : ""}</span>
             ${api.token.oauth
-              ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button-${i}">Sign in</button>`
-              : html`<a href="${api.token.link}" target="_blank" rel="noopener">Get token <i class="bi bi-box-arrow-up-right"></i></a>`}
+              ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button-${i}">
+                  Sign in
+                </button>`
+              : html`<a href="${api.token.link}" target="_blank" rel="noopener"
+                  >Get token <i class="bi bi-box-arrow-up-right"></i
+                ></a>`}
           </label>
-          <input type="password" class="form-control" id="token-${i}" name="token-${api.title}" placeholder="Enter ${api.token.label}" ${api.token.required ? "required" : ""} />
+          <input
+            type="password"
+            class="form-control"
+            id="token-${api.token.key}"
+            name="token-${api.token.key}"
+            placeholder="Enter ${api.token.label}"
+            ${api.token.required ? "required" : ""}
+          />
         </div>
-      `
+      `,
     ),
-    $tokenInputs
+    $tokenInputs,
   );
 
   formState.restore();
 
   apis.forEach((api, i) => {
-    if (api.token.oauth) initOAuth(api.token.oauth, i);
+    if (api.token.oauth) initOAuth(api.token, i);
   });
 
   $systemPrompt.value = apis.map((api) => api.prompt).join("\n\n");
@@ -114,9 +128,9 @@ function updateSelection() {
   messages.splice(0, messages.length);
   renderSteps(messages);
 }
-async function initOAuth(config, index) {
-  if (config.provider === "google") {
-    if (!window.google || !google.accounts) {
+async function initOAuth(token, index) {
+  if (token.oauth.provider === "google") {
+    if (!window.google || !google.accounts)
       await new Promise((resolve, reject) => {
         const script = document.createElement("script");
         script.src = "https://accounts.google.com/gsi/client";
@@ -124,13 +138,12 @@ async function initOAuth(config, index) {
         script.onerror = reject;
         document.head.appendChild(script);
       });
-    }
     const button = document.getElementById(`oauth-button-${index}`);
     const tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: config.clientId,
-      scope: config.scope,
+      client_id: token.oauth.clientId,
+      scope: token.oauth.scope,
       callback: (resp) => {
-        const input = document.getElementById(`token-${index}`);
+        const input = document.getElementById(`token-${token.key}`);
         input.value = resp.access_token;
         input.dispatchEvent(new Event("change", { bubbles: true }));
       },
@@ -176,7 +189,7 @@ $taskForm.addEventListener("submit", async (e) => {
     messages.push(message);
 
     try {
-      for await (const { content } of asyncLLM(`${baseUrl}/chat/completions`, {
+      for await (const event of asyncLLM(`${baseUrl}/chat/completions`, {
         ...request,
         body: JSON.stringify({
           model,
@@ -184,8 +197,10 @@ $taskForm.addEventListener("submit", async (e) => {
           messages: [{ role: "system", content: agentPrompt($systemPrompt.value) }, ...llmMessages],
         }),
       })) {
-        message.content = content;
-        if (content) renderSteps(messages);
+        message.content = event.content ?? "";
+        if (event.error) messages.push({ role: "user", name: "error", content: JSON.stringify(event) });
+        renderSteps(messages);
+        if (event.error) return;
       }
     } catch (error) {
       messages.push({ role: "user", name: "error", content: error.stack });
@@ -219,11 +234,11 @@ $taskForm.addEventListener("submit", async (e) => {
     }
     messages.push({ role: "user", name: "result", content: "Running code..." });
     renderSteps(messages);
+    const tokens = {};
+    selectedApis.forEach((i) => {
+      tokens[demos[i].token.key] = document.getElementById(`token-${demos[i].token.key}`)?.value || "";
+    });
     try {
-      const tokens = {};
-      selectedApis.forEach((i) => {
-        tokens[demos[i].token.key || demos[i].title] = document.getElementById(`token-${i}`)?.value || "";
-      });
       const result = await module.run({ tokens });
       messages.at(-1).content = JSON.stringify(result, null, 2);
     } catch (error) {
@@ -236,7 +251,7 @@ $taskForm.addEventListener("submit", async (e) => {
     const validationMessages = [...messages.filter((m) => m.name === "user"), messages.at(-2), messages.at(-1)];
     let validationMessage = { role: "assistant", name: "validator", content: "" };
     messages.push(validationMessage);
-    for await (const { content } of asyncLLM(`${baseUrl}/chat/completions`, {
+    for await (const event of asyncLLM(`${baseUrl}/chat/completions`, {
       ...request,
       body: JSON.stringify({
         model,
@@ -244,8 +259,10 @@ $taskForm.addEventListener("submit", async (e) => {
         messages: [{ role: "system", content: validatorPrompt }, ...validationMessages],
       }),
     })) {
-      validationMessage.content = content;
-      if (content) renderSteps(messages);
+      validationMessage.content = event.content ?? "";
+      if (event.error) messages.push({ role: "user", name: "error", content: JSON.stringify(event) });
+      renderSteps(messages);
+      if (event.error) return;
     }
     if (validationMessage.content.includes("🟢")) return;
   }
@@ -289,12 +306,12 @@ function renderSteps(steps) {
             <i class="bi bi-chevron-down ms-auto"></i>
           </div>
           <div class="collapse show" id="step-${stepNum}">
-            <div class="card-body">${unsafeHTML(marked.parse(markdown))}</div>
+            <div class="card-body">${unsafeHTML(marked.parse(markdown ?? ""))}</div>
           </div>
         </div>
       `;
     }),
-    $results
+    $results,
   );
 }
 

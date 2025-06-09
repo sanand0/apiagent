@@ -23,7 +23,8 @@ export const demos = [
     icon: "stack-overflow",
     title: "StackOverflow API",
     description: "Search questions, answers, and users on StackOverflow.",
-    prompt: "Use StackExchange API. Only if tokens.stackoverflow is not empty, add Authorization: Bearer ${tokens.stackoverflow}",
+    prompt:
+      "Use StackExchange API. Only if tokens.stackoverflow is not empty, add Authorization: Bearer ${tokens.stackoverflow}",
     questions: [
       "What are the most upvoted JavaScript questions on StackOverflow?",
       "What are the most recent questions about React on StackOverflow?",
@@ -59,7 +60,7 @@ export const demos = [
     icon: "google",
     title: "Google Workspace",
     description: "Access Gmail, Calendar and Drive using Google APIs.",
-    prompt: "Use Google Workspace APIs. Send Authorization: Bearer ${tokens.workspace}. Max 5 concurrent requests.",
+    prompt: "Use Google Workspace APIs. Send Authorization: Bearer ${tokens.google}. Max 5 concurrent requests.",
     questions: [
       "List my unread Gmail messages in the inbox",
       "What events do I have tomorrow?",
@@ -71,7 +72,7 @@ export const demos = [
       label: "Google OAuth token",
       link: "https://developers.google.com/oauthplayground/",
       required: true,
-      key: "workspace",
+      key: "google",
       oauth: {
         provider: "google",
         // root.node@gmail.com | Project: Personal mail etc. OAuth Client: Web apps
@@ -230,7 +231,8 @@ Single entity responses return the object directly.
     icon: "kanban",
     title: "JIRA API",
     description: "Query JIRA issues, projects, and workflows.",
-    prompt: "Use the Atlassian JIRA REST API. Format JQL queries correctly and use the appropriate endpoints. Send Authorization: Bearer ${tokens.jira}",
+    prompt:
+      "Use the Atlassian JIRA REST API. Format JQL queries correctly and use the appropriate endpoints. Send Authorization: Bearer ${tokens.jira}",
     questions: [
       "List all open bugs in project XYZ",
       "Show me the issues assigned to me",
@@ -249,7 +251,8 @@ Single entity responses return the object directly.
     icon: "search",
     title: "Google Custom Search",
     description: "Search the web with a Custom Search Engine.",
-    prompt: "Use Google Custom Search JSON API at https://www.googleapis.com/customsearch/v1. Send key=${tokens.cse} and your cx ID along with q, num and other params. Results come in items[] with title, link and snippet.",
+    prompt:
+      "Use Google Custom Search JSON API at https://www.googleapis.com/customsearch/v1. Send key=${tokens.cse} and your cx ID along with q, num and other params. Results come in items[] with title, link and snippet.",
     questions: [
       "Search the web for tutorials on the Fetch API",
       "Find recent news about AI policy",
@@ -266,7 +269,8 @@ Single entity responses return the object directly.
     icon: "search-heart",
     title: "SerpApi",
     description: "Retrieve Google search results from SerpApi.",
-    prompt: "Use https://serpapi.com/search.json with engine=google, q and api_key=${tokens.serpapi}. Optional params like location, num or start control the results. Parse organic_results[].",
+    prompt:
+      "Use https://serpapi.com/search.json with engine=google, q and api_key=${tokens.serpapi}. Optional params like location, num or start control the results. Parse organic_results[].",
     questions: [
       "Top Google results for best programming laptop 2024",
       "Latest news about OpenAI stock",
@@ -283,7 +287,8 @@ Single entity responses return the object directly.
     icon: "router",
     title: "OpenRouter",
     description: "Call models via the OpenRouter API.",
-    prompt: "Use POST https://openrouter.ai/api/v1/chat/completions with Authorization: Bearer ${tokens.openrouter}. Include Referer and X-Title headers. Choose the model parameter to pick a provider.",
+    prompt:
+      "Use POST https://openrouter.ai/api/v1/chat/completions with Authorization: Bearer ${tokens.openrouter}. Include Referer and X-Title headers. Choose the model parameter to pick a provider.",
     questions: [
       "Summarize https://example.com",
       "Explain quantum computing in simple terms",
@@ -300,7 +305,8 @@ Single entity responses return the object directly.
     icon: "globe2",
     title: "Wikipedia API",
     description: "Query Wikipedia articles and summaries.",
-    prompt: "Use https://en.wikipedia.org/w/api.php with action=query. Common params: list=search&srsearch=<term> or prop=extracts&titles=<title>&explaintext. No auth required.",
+    prompt:
+      "Use https://en.wikipedia.org/w/api.php with action=query. Common params: list=search&srsearch=<term> or prop=extracts&titles=<title>&explaintext. No auth required.",
     questions: [
       "What is the population of Canada?",
       "Give the intro for Python (programming language)",
@@ -317,12 +323,9 @@ Single entity responses return the object directly.
     icon: "database",
     title: "Wikidata API",
     description: "Access structured data from Wikidata.",
-    prompt: "Use https://www.wikidata.org/w/api.php. Search via action=wbsearchentities&search=<term>&language=en and fetch details with action=wbgetentities&ids=<id>. No auth needed.",
-    questions: [
-      "Find the Wikidata ID for Elon Musk",
-      "Get the birth date of Q42",
-      "List properties of Q90",
-    ],
+    prompt:
+      "Use https://www.wikidata.org/w/api.php. Search via action=wbsearchentities&search=<term>&language=en and fetch details with action=wbgetentities&ids=<id>. No auth needed.",
+    questions: ["Find the Wikidata ID for Elon Musk", "Get the birth date of Q42", "List properties of Q90"],
     token: {
       label: "Wikidata API token",
       link: "https://www.wikidata.org/wiki/Wikidata:Data_access",
