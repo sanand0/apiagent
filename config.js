@@ -3,7 +3,7 @@ export const demos = [
     icon: "github",
     title: "GitHub API",
     description: "Query GitHub repositories, users, issues, and more.",
-    prompt: "Use GitHub API. Only if token is not empty, add Authorization: Bearer ${token}",
+    prompt: "Use GitHub API. Only if tokens['GitHub API'] is not empty, add Authorization: Bearer ${tokens['GitHub API']}",
     questions: [
       "What are the most starred JavaScript repositories on GitHub?",
       "What did @simonw do in the last few days?",
@@ -22,7 +22,7 @@ export const demos = [
     icon: "stack-overflow",
     title: "StackOverflow API",
     description: "Search questions, answers, and users on StackOverflow.",
-    prompt: "Use StackExchange API. Only if token is not empty, add Authorization: Bearer ${token}",
+    prompt: "Use StackExchange API. Only if tokens['StackOverflow API'] is not empty, add Authorization: Bearer ${tokens['StackOverflow API']}",
     questions: [
       "What are the most upvoted JavaScript questions on StackOverflow?",
       "What are the most recent questions about React on StackOverflow?",
@@ -56,7 +56,7 @@ export const demos = [
     icon: "google",
     title: "Google Workspace",
     description: "Access Gmail, Calendar and Drive using Google APIs.",
-    prompt: "Use Google Workspace APIs. Send Authorization: Bearer ${token}. Max 5 concurrent requests.",
+    prompt: "Use Google Workspace APIs. Send Authorization: Bearer ${tokens['Google Workspace']}. Max 5 concurrent requests.",
     questions: [
       "List my unread Gmail messages in the inbox",
       "What events do I have tomorrow?",
@@ -264,6 +264,10 @@ ${apiInfo}
 
 \`\`\`js
 export async function run(params) {
+  // params will contain a 'tokens' object: { tokens: { "API Title 1": "token1", "API Title 2": "token2" } }
+  // Access specific tokens like this: const specificToken = params.tokens['API Title'];
+  // Example for GitHub API: const githubToken = params.tokens['GitHub API'];
+  // If an API doesn't require a token or it's optional and not provided, its entry might be missing or empty.
   // ... code to fetch() from the API ...
   // ... code to calculate the result ...
   // ... on error, throw new Error. Include error, latest response headers AND text.
@@ -271,7 +275,11 @@ export async function run(params) {
 }
 \`\`\`
 
-The user will ALWAYS call \`result = await run({token})\` and share the result (or error).
+The user will ALWAYS call \`result = await run({tokens})\` (where \`tokens\` is an object mapping API titles to token strings).
+The \`run\` function receives an object, so you should destructure or access \`params.tokens\`.
+Example: \`export async function run({tokens}) { ... }\` or inside the function \`const apiTokens = tokens;\`.
+When using an API, access its token like this: \`const specificApiToken = tokens['API Title'];\`.
+For example, for GitHub API: \`const githubToken = tokens['GitHub API']; if (githubToken) { headers['Authorization'] = \`Bearer \${githubToken}\`; }\`.
 
 Do NOT forget to wrap in \`\`\`js ... \`\`\`
 

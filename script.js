@@ -32,6 +32,7 @@ const $systemPrompt = document.querySelector("#system-prompt");
 
 const formState = saveform("#task-form", { exclude: '[type="file"]' });
 const messages = [];
+let selectedApis = []; // Array to store indices of selected APIs
 
 // Render API cards based on config
 function renderApiCards() {
@@ -64,65 +65,108 @@ function renderApiCards() {
 
 // Select an API and update the UI
 function selectApi(index) {
-  const selectedApi = demos[index];
+  const apiIndexInSelected = selectedApis.indexOf(index);
+  const card = document.querySelector(`.api-card[data-index="${index}"]`);
 
-  // Highlight the selected card
-  document.querySelectorAll(".api-card").forEach((card, i) => {
-    if (i === index) card.classList.add("border-primary", "shadow");
-    else card.classList.remove("border-primary", "shadow");
-  });
+  if (apiIndexInSelected > -1) {
+    // API is already selected, so deselect it
+    selectedApis.splice(apiIndexInSelected, 1);
+    card.classList.remove("border-primary", "shadow");
+  } else {
+    // API is not selected, so select it
+    selectedApis.push(index);
+    card.classList.add("border-primary", "shadow");
+  }
 
-  // Update example questions
-  render(
-    selectedApi.questions.map(
-      (question) =>
-        html`<button type="button" class="list-group-item list-group-item-action example-question">${question}</button>`
-    ),
-    $exampleQuestions
-  );
-
-  // Update token inputs
-  render(
-    html`
-      <div class="mb-2">
-        <label for="token" class="form-label d-flex justify-content-between">
-          <span>
-            ${selectedApi.token.label} ${selectedApi.token.required ? html`<span class="text-danger">*</span>` : ""}
-          </span>
-          ${selectedApi.token.oauth
-            ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button">Sign in</button>`
-            : html`<a href="${selectedApi.token.link}" target="_blank" rel="noopener"
-                >Get token <i class="bi bi-box-arrow-up-right"></i
-              ></a>`}
-        </label>
-        <input
-          type="password"
-          class="form-control"
-          id="token"
-          name="token-${selectedApi.title}"
-          placeholder="Enter ${selectedApi.token.label}"
-          ${selectedApi.token.required ? "required" : ""}
-        />
-      </div>
-    `,
-    $tokenInputs
-  );
-
-  formState.restore();
-
-  if (selectedApi.token.oauth) initOAuth(selectedApi.token.oauth);
-
-  // Update system prompt
-  $systemPrompt.value = selectedApi.prompt;
+  // Update system prompt by concatenating prompts of all selected APIs
+  let combinedPrompt = "";
+  if (selectedApis.length > 0) {
+    combinedPrompt = selectedApis.map(i => demos[i].prompt).join("\n\n---\n\n"); // Join with a separator
+  }
+  $systemPrompt.value = combinedPrompt;
   $systemPrompt.dispatchEvent(new Event("change", { bubbles: true }));
 
-  messages.splice(0, messages.length);
-  renderSteps(messages);
+  // Update example questions
+  if (selectedApis.length === 1) {
+    const singleSelectedApi = demos[selectedApis[0]];
+    render(
+      singleSelectedApi.questions.map(
+        (question) =>
+          html`<button type="button" class="list-group-item list-group-item-action example-question">${question}</button>`
+      ),
+      $exampleQuestions
+    );
+  } else {
+    // Clear example questions if multiple or no APIs are selected
+    render(html``, $exampleQuestions);
+  }
+
+  // Update token inputs for ALL selected APIs
+  if (selectedApis.length > 0) {
+    render(selectedApis.map(selectedIndex => {
+      const apiConfig = demos[selectedIndex];
+      const inputId = `token-${apiConfig.title.replace(/\s+/g, '-')}`; // Unique ID
+      const oauthButtonId = `oauth-button-${selectedIndex}`; // Unique ID for OAuth button
+
+      return html`
+        <div class="mb-3 border rounded p-3"> <!-- Added a border for visual separation -->
+          <h5>${apiConfig.title} Token</h5> <!-- Title for the API's token section -->
+          <label for="${inputId}" class="form-label d-flex justify-content-between">
+            <span>
+              ${apiConfig.token.label} ${apiConfig.token.required ? html`<span class="text-danger">*</span>` : ""}
+            </span>
+            ${apiConfig.token.oauth
+              ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="${oauthButtonId}">Sign in with ${apiConfig.title}</button>`
+              : html`<a href="${apiConfig.token.link}" target="_blank" rel="noopener"
+                  >Get token <i class="bi bi-box-arrow-up-right"></i
+                ></a>`}
+          </label>
+          <input
+            type="password"
+            class="form-control"
+            id="${inputId}"
+            name="token-${apiConfig.title.replace(/\s+/g, '-')}" // Unique name for saveform
+            placeholder="Enter ${apiConfig.token.label}"
+            ${apiConfig.token.required ? "required" : ""}
+          />
+          ${apiConfig.token.oauth ? html`<div class="form-text">OAuth tokens are typically short-lived.</div>` : ''}
+        </div>
+      `;
+    }), $tokenInputs);
+
+    formState.restore(); // Restore form state for all rendered inputs
+
+    // Initialize OAuth for each selected API that uses it
+    selectedApis.forEach(selectedIndex => {
+      const apiConfig = demos[selectedIndex];
+      if (apiConfig.token.oauth) {
+        const buttonId = `oauth-button-${selectedIndex}`;
+        const inputId = `token-${apiConfig.title.replace(/\s+/g, '-')}`;
+        const button = document.getElementById(buttonId);
+        const input = document.getElementById(inputId);
+        if (button && input) {
+          initOAuth(apiConfig.token.oauth, button, input); // Call refactored initOAuth
+        }
+      }
+    });
+  } else {
+    // No APIs selected, clear token inputs
+    render(html``, $tokenInputs);
+  }
+
+  // messages.splice(0, messages.length); // Keep or remove based on desired behavior for messages
+  // renderSteps(messages); // Keep or remove
 }
 
-async function initOAuth(config) {
+// Refactored initOAuth
+async function initOAuth(config, buttonElement, inputElement) {
+  if (!buttonElement || !inputElement) {
+    console.error("OAuth button or input element not provided to initOAuth");
+    return;
+  }
   if (config.provider === "google") {
     if (!window.google || !google.accounts) {
+      // Consider awaiting this promise if called for the first time for any button
       await new Promise((resolve, reject) => {
         const script = document.createElement("script");
         script.src = "https://accounts.google.com/gsi/client";
@@ -131,17 +175,28 @@ async function initOAuth(config) {
         document.head.appendChild(script);
       });
     }
-    const button = document.getElementById("oauth-button");
     const tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: config.clientId,
       scope: config.scope,
       callback: (resp) => {
-        const input = document.getElementById("token");
-        input.value = resp.access_token;
-        input.dispatchEvent(new Event("change", { bubbles: true }));
+        if (resp.error) {
+          console.error('Google OAuth Error:', resp.error);
+          // Optionally display this error to the user
+          inputElement.value = ''; // Clear token on error
+          inputElement.placeholder = `OAuth failed: ${resp.error}`;
+        } else {
+          inputElement.value = resp.access_token;
+        }
+        inputElement.dispatchEvent(new Event("change", { bubbles: true }));
       },
+      error_callback: (err) => { // Handle errors during the token client flow
+        console.error('Google OAuth Token Client Error:', err);
+        inputElement.value = '';
+        inputElement.placeholder = 'OAuth error. Check console.';
+        inputElement.dispatchEvent(new Event("change", { bubbles: true }));
+      }
     });
-    button.addEventListener("click", () => tokenClient.requestAccessToken());
+    buttonElement.addEventListener("click", () => tokenClient.requestAccessToken());
   }
 }
 
@@ -226,7 +281,17 @@ $taskForm.addEventListener("submit", async (e) => {
     messages.push({ role: "user", name: "result", content: "Running code..." });
     renderSteps(messages);
     try {
-      const result = await module.run({ token: document.getElementById("token")?.value || "" });
+      // Collect all tokens from their respective input fields
+      const apiTokens = {};
+      selectedApis.forEach(index => {
+        const apiConfig = demos[index];
+        const inputId = `token-${apiConfig.title.replace(/\s+/g, '-')}`;
+        const tokenInput = document.getElementById(inputId);
+        if (tokenInput) {
+          apiTokens[apiConfig.title] = tokenInput.value;
+        }
+      });
+      const result = await module.run({ tokens: apiTokens }); // Pass the object of all tokens
       messages.at(-1).content = JSON.stringify(result, null, 2);
     } catch (error) {
       messages.at(-1).name = "error";
