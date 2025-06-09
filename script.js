@@ -32,6 +32,7 @@ const $systemPrompt = document.querySelector("#system-prompt");
 
 const formState = saveform("#task-form", { exclude: '[type="file"]' });
 const messages = [];
+const selectedApis = new Set([0]);
 
 // Render API cards based on config
 function renderApiCards() {
@@ -57,70 +58,63 @@ function renderApiCards() {
   document.querySelectorAll(".select-api").forEach((button) => {
     button.addEventListener("click", (e) => {
       const index = parseInt(e.target.dataset.index);
-      selectApi(index);
+      toggleApi(index);
     });
   });
 }
 
-// Select an API and update the UI
-function selectApi(index) {
-  const selectedApi = demos[index];
+// Toggle API selection and update the UI
+function toggleApi(index) {
+  if (selectedApis.has(index)) selectedApis.delete(index);
+  else selectedApis.add(index);
+  updateSelection();
+}
 
-  // Highlight the selected card
+function updateSelection() {
+  const apis = [...selectedApis].map((i) => demos[i]);
+
   document.querySelectorAll(".api-card").forEach((card, i) => {
-    if (i === index) card.classList.add("border-primary", "shadow");
+    if (selectedApis.has(i)) card.classList.add("border-primary", "shadow");
     else card.classList.remove("border-primary", "shadow");
   });
 
-  // Update example questions
   render(
-    selectedApi.questions.map(
-      (question) =>
-        html`<button type="button" class="list-group-item list-group-item-action example-question">${question}</button>`
+    apis.flatMap((api) => api.questions).map(
+      (q) => html`<button type="button" class="list-group-item list-group-item-action example-question">${q}</button>`
     ),
     $exampleQuestions
   );
 
-  // Update token inputs
   render(
-    html`
-      <div class="mb-2">
-        <label for="token" class="form-label d-flex justify-content-between">
-          <span>
-            ${selectedApi.token.label} ${selectedApi.token.required ? html`<span class="text-danger">*</span>` : ""}
-          </span>
-          ${selectedApi.token.oauth
-            ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button">Sign in</button>`
-            : html`<a href="${selectedApi.token.link}" target="_blank" rel="noopener"
-                >Get token <i class="bi bi-box-arrow-up-right"></i
-              ></a>`}
-        </label>
-        <input
-          type="password"
-          class="form-control"
-          id="token"
-          name="token-${selectedApi.title}"
-          placeholder="Enter ${selectedApi.token.label}"
-          ${selectedApi.token.required ? "required" : ""}
-        />
-      </div>
-    `,
+    apis.map(
+      (api, i) => html`
+        <div class="mb-2">
+          <label for="token-${i}" class="form-label d-flex justify-content-between">
+            <span>${api.token.label}${api.token.required ? html`<span class="text-danger">*</span>` : ""}</span>
+            ${api.token.oauth
+              ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button-${i}">Sign in</button>`
+              : html`<a href="${api.token.link}" target="_blank" rel="noopener">Get token <i class="bi bi-box-arrow-up-right"></i></a>`}
+          </label>
+          <input type="password" class="form-control" id="token-${i}" name="token-${api.title}" placeholder="Enter ${api.token.label}" ${api.token.required ? "required" : ""} />
+        </div>
+      `
+    ),
     $tokenInputs
   );
 
   formState.restore();
 
-  if (selectedApi.token.oauth) initOAuth(selectedApi.token.oauth);
+  apis.forEach((api, i) => {
+    if (api.token.oauth) initOAuth(api.token.oauth, i);
+  });
 
-  // Update system prompt
-  $systemPrompt.value = selectedApi.prompt;
+  $systemPrompt.value = apis.map((api) => api.prompt).join("\n\n");
   $systemPrompt.dispatchEvent(new Event("change", { bubbles: true }));
 
   messages.splice(0, messages.length);
   renderSteps(messages);
 }
-
-async function initOAuth(config) {
+async function initOAuth(config, index) {
   if (config.provider === "google") {
     if (!window.google || !google.accounts) {
       await new Promise((resolve, reject) => {
@@ -131,12 +125,12 @@ async function initOAuth(config) {
         document.head.appendChild(script);
       });
     }
-    const button = document.getElementById("oauth-button");
+    const button = document.getElementById(`oauth-button-${index}`);
     const tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: config.clientId,
       scope: config.scope,
       callback: (resp) => {
-        const input = document.getElementById("token");
+        const input = document.getElementById(`token-${index}`);
         input.value = resp.access_token;
         input.dispatchEvent(new Event("change", { bubbles: true }));
       },
@@ -226,7 +220,11 @@ $taskForm.addEventListener("submit", async (e) => {
     messages.push({ role: "user", name: "result", content: "Running code..." });
     renderSteps(messages);
     try {
-      const result = await module.run({ token: document.getElementById("token")?.value || "" });
+      const tokens = {};
+      selectedApis.forEach((i) => {
+        tokens[demos[i].token.key || demos[i].title] = document.getElementById(`token-${i}`)?.value || "";
+      });
+      const result = await module.run({ tokens });
       messages.at(-1).content = JSON.stringify(result, null, 2);
     } catch (error) {
       messages.at(-1).name = "error";
@@ -302,4 +300,4 @@ function renderSteps(steps) {
 
 // Initialize the application
 renderApiCards();
-selectApi(0);
+updateSelection();

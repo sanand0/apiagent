@@ -3,7 +3,7 @@ export const demos = [
     icon: "github",
     title: "GitHub API",
     description: "Query GitHub repositories, users, issues, and more.",
-    prompt: "Use GitHub API. Only if token is not empty, add Authorization: Bearer ${token}",
+    prompt: "Use GitHub API. Only if tokens.github is not empty, add Authorization: Bearer ${tokens.github}",
     questions: [
       "What are the most starred JavaScript repositories on GitHub?",
       "What did @simonw do in the last few days?",
@@ -16,13 +16,14 @@ export const demos = [
       label: "GitHub API token",
       link: "https://github.com/settings/tokens",
       required: false,
+      key: "github",
     },
   },
   {
     icon: "stack-overflow",
     title: "StackOverflow API",
     description: "Search questions, answers, and users on StackOverflow.",
-    prompt: "Use StackExchange API. Only if token is not empty, add Authorization: Bearer ${token}",
+    prompt: "Use StackExchange API. Only if tokens.stackoverflow is not empty, add Authorization: Bearer ${tokens.stackoverflow}",
     questions: [
       "What are the most upvoted JavaScript questions on StackOverflow?",
       "What are the most recent questions about React on StackOverflow?",
@@ -34,13 +35,14 @@ export const demos = [
       label: "StackOverflow API token",
       link: "https://stackapps.com/apps/oauth/register",
       required: false,
+      key: "stackoverflow",
     },
   },
   {
     icon: "graph-up-arrow",
     title: "Google Analytics",
     description: "Explore your website traffic and user behavior with Google Analytics.",
-    prompt: "Use Google Analytics Data API to answer the question",
+    prompt: "Use Google Analytics Data API. Send Authorization: Bearer ${tokens.ga}",
     questions: [
       "How many daily active users has your Android app had in the last week?",
       "How many page views the top 10 pages on your site had in the last 28 days?",
@@ -50,13 +52,14 @@ export const demos = [
       label: "Google Analytics API token",
       link: "https://developers.google.com/oauthplayground/",
       required: true,
+      key: "ga",
     },
   },
   {
     icon: "google",
     title: "Google Workspace",
     description: "Access Gmail, Calendar and Drive using Google APIs.",
-    prompt: "Use Google Workspace APIs. Send Authorization: Bearer ${token}. Max 5 concurrent requests.",
+    prompt: "Use Google Workspace APIs. Send Authorization: Bearer ${tokens.workspace}. Max 5 concurrent requests.",
     questions: [
       "List my unread Gmail messages in the inbox",
       "What events do I have tomorrow?",
@@ -68,6 +71,7 @@ export const demos = [
       label: "Google OAuth token",
       link: "https://developers.google.com/oauthplayground/",
       required: true,
+      key: "workspace",
       oauth: {
         provider: "google",
         // root.node@gmail.com | Project: Personal mail etc. OAuth Client: Web apps
@@ -219,13 +223,14 @@ Single entity responses return the object directly.
       label: "Crossref API token",
       link: "https://crossref.org/for-developers/",
       required: false,
+      key: "crossref",
     },
   },
   {
     icon: "kanban",
     title: "JIRA API",
     description: "Query JIRA issues, projects, and workflows.",
-    prompt: "Use the Atlassian JIRA REST API. Format JQL queries correctly and use the appropriate endpoints.",
+    prompt: "Use the Atlassian JIRA REST API. Format JQL queries correctly and use the appropriate endpoints. Send Authorization: Bearer ${tokens.jira}",
     questions: [
       "List all open bugs in project XYZ",
       "Show me the issues assigned to me",
@@ -237,6 +242,7 @@ Single entity responses return the object directly.
       label: "JIRA API token",
       link: "https://id.atlassian.com/manage-profile/security/api-tokens",
       required: true,
+      key: "jira",
     },
   },
 ];
@@ -271,7 +277,7 @@ export async function run(params) {
 }
 \`\`\`
 
-The user will ALWAYS call \`result = await run({token})\` and share the result (or error).
+The user will ALWAYS call \`result = await run({tokens})\` where \`tokens\` is an object with keys for each API and share the result (or error).
 
 Do NOT forget to wrap in \`\`\`js ... \`\`\`
 
