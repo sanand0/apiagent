@@ -44,6 +44,9 @@ API Agent is an interactive web application that allows users to query APIs thro
   - [StackOverflow Token](https://stackapps.com/apps/oauth/register)
   - [Google OAuth Token](https://developers.google.com/oauthplayground/)
   - [Jira Token](https://id.atlassian.com/manage-profile/security/api-tokens)
+  - [Google Custom Search API Key](https://developers.google.com/custom-search/v1/introduction)
+  - [SerpApi Key](https://serpapi.com/manage-api-key)
+  - [OpenRouter API Key](https://openrouter.ai/account/api-keys)
 
 ### Local Setup
 

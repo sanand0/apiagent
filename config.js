@@ -245,6 +245,91 @@ Single entity responses return the object directly.
       key: "jira",
     },
   },
+  {
+    icon: "search",
+    title: "Google Custom Search",
+    description: "Search the web with a Custom Search Engine.",
+    prompt: "Use Google Custom Search JSON API at https://www.googleapis.com/customsearch/v1. Send key=${tokens.cse} and your cx ID along with q, num and other params. Results come in items[] with title, link and snippet.",
+    questions: [
+      "Search the web for tutorials on the Fetch API",
+      "Find recent news about AI policy",
+      "Show images of the Eiffel Tower",
+    ],
+    token: {
+      label: "Google CSE API key",
+      link: "https://developers.google.com/custom-search/v1/introduction",
+      required: true,
+      key: "cse",
+    },
+  },
+  {
+    icon: "search-heart",
+    title: "SerpApi",
+    description: "Retrieve Google search results from SerpApi.",
+    prompt: "Use https://serpapi.com/search.json with engine=google, q and api_key=${tokens.serpapi}. Optional params like location, num or start control the results. Parse organic_results[].",
+    questions: [
+      "Top Google results for best programming laptop 2024",
+      "Latest news about OpenAI stock",
+      "Find coffee shops in New York",
+    ],
+    token: {
+      label: "SerpApi key",
+      link: "https://serpapi.com/manage-api-key",
+      required: true,
+      key: "serpapi",
+    },
+  },
+  {
+    icon: "router",
+    title: "OpenRouter",
+    description: "Call models via the OpenRouter API.",
+    prompt: "Use POST https://openrouter.ai/api/v1/chat/completions with Authorization: Bearer ${tokens.openrouter}. Include Referer and X-Title headers. Choose the model parameter to pick a provider.",
+    questions: [
+      "Summarize https://example.com",
+      "Explain quantum computing in simple terms",
+      "Translate Good morning to French",
+    ],
+    token: {
+      label: "OpenRouter API key",
+      link: "https://openrouter.ai/account/api-keys",
+      required: true,
+      key: "openrouter",
+    },
+  },
+  {
+    icon: "globe2",
+    title: "Wikipedia API",
+    description: "Query Wikipedia articles and summaries.",
+    prompt: "Use https://en.wikipedia.org/w/api.php with action=query. Common params: list=search&srsearch=<term> or prop=extracts&titles=<title>&explaintext. No auth required.",
+    questions: [
+      "What is the population of Canada?",
+      "Give the intro for Python (programming language)",
+      "List sections of the New York City page",
+    ],
+    token: {
+      label: "Wikipedia API token",
+      link: "https://www.mediawiki.org/wiki/API:Main_page",
+      required: false,
+      key: "wikipedia",
+    },
+  },
+  {
+    icon: "database",
+    title: "Wikidata API",
+    description: "Access structured data from Wikidata.",
+    prompt: "Use https://www.wikidata.org/w/api.php. Search via action=wbsearchentities&search=<term>&language=en and fetch details with action=wbgetentities&ids=<id>. No auth needed.",
+    questions: [
+      "Find the Wikidata ID for Elon Musk",
+      "Get the birth date of Q42",
+      "List properties of Q90",
+    ],
+    token: {
+      label: "Wikidata API token",
+      link: "https://www.wikidata.org/wiki/Wikidata:Data_access",
+      required: false,
+      key: "wikidata",
+    },
+  },
 ];
 
 // now() returns the current time to the nearest 10 minutes
