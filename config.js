@@ -333,6 +333,20 @@ Single entity responses return the object directly.
       key: "wikidata",
     },
   },
+  {
+    icon: "film",
+    title: "TMDB",
+    description: "Discover movies and TV shows with The Movie Database.",
+    prompt:
+      "Use https://api.themoviedb.org/3. Send Authorization: Bearer ${tokens.tmdb}. Search via /search/movie?query=<term> and get details from /movie/<id>.",
+    questions: ["Popular movies this week", "Search for movies about space", "Details for the movie Inception"],
+    token: {
+      label: "TMDB API key",
+      link: "https://www.themoviedb.org/settings/api",
+      required: true,
+      key: "tmdb",
+    },
+  },
 ];
 
 // now() returns the current time to the nearest 10 minutes
