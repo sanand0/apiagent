@@ -3,7 +3,7 @@ export const demos = [
     icon: "github",
     title: "GitHub API",
     description: "Query GitHub repositories, users, issues, and more.",
-    prompt: "Use GitHub API. Only if tokens.github is not empty, add Authorization: Bearer ${tokens.github}",
+    prompt: "Use GitHub API. Only if params.github is not empty, add Authorization: Bearer ${params.github}",
     questions: [
       "What are the most starred JavaScript repositories on GitHub?",
       "What did @simonw do in the last few days?",
@@ -12,19 +12,22 @@ export const demos = [
       "List the open issues in the React repository",
       "Show me the most recent pull requests in the Vue.js project",
     ],
-    token: {
-      label: "GitHub API token",
-      link: "https://github.com/settings/tokens",
-      required: false,
-      key: "github",
-    },
+    params: [
+      {
+        label: "GitHub API token",
+        link: "https://github.com/settings/tokens",
+        required: false,
+        key: "github",
+        type: "password",
+      },
+    ],
   },
   {
     icon: "stack-overflow",
     title: "StackOverflow API",
     description: "Search questions, answers, and users on StackOverflow.",
     prompt:
-      "Use StackExchange API. Only if tokens.stackoverflow is not empty, add Authorization: Bearer ${tokens.stackoverflow}",
+      "Use StackExchange API. Only if params.stackoverflow is not empty, add Authorization: Bearer ${params.stackoverflow}",
     questions: [
       "What are the most upvoted JavaScript questions on StackOverflow?",
       "What are the most recent questions about React on StackOverflow?",
@@ -32,35 +35,47 @@ export const demos = [
       "What are the most viewed TypeScript questions this month?",
       "Who are the top users for the React tag on StackOverflow?",
     ],
-    token: {
-      label: "StackOverflow API token",
-      link: "https://stackapps.com/apps/oauth/register",
-      required: false,
-      key: "stackoverflow",
-    },
+    params: [
+      {
+        label: "StackOverflow API token",
+        link: "https://stackapps.com/apps/oauth/register",
+        required: false,
+        key: "stackoverflow",
+        type: "password",
+      },
+    ],
   },
   {
     icon: "graph-up-arrow",
     title: "Google Analytics",
     description: "Explore your website traffic and user behavior with Google Analytics.",
-    prompt: "Use Google Analytics Data API. Send Authorization: Bearer ${tokens.ga}",
+    prompt: "Use Google Analytics Data API for property ${params.gaPropertyId}. Authorization: Bearer ${params.ga}",
     questions: [
       "How many daily active users has your Android app had in the last week?",
       "How many page views the top 10 pages on your site had in the last 28 days?",
       "How many sessions the top 10 pages on your site had in the last 28 days?",
     ],
-    token: {
-      label: "Google Analytics API token",
-      link: "https://developers.google.com/oauthplayground/",
-      required: true,
-      key: "ga",
-    },
+    params: [
+      {
+        label: "Google Analytics API token",
+        link: "https://developers.google.com/oauthplayground/",
+        required: true,
+        key: "ga",
+        type: "password",
+      },
+      {
+        label: "Google Analytics property ID",
+        key: "gaPropertyId",
+        type: "text",
+        required: false,
+      },
+    ],
   },
   {
     icon: "google",
     title: "Google Workspace",
     description: "Access Gmail, Calendar and Drive using Google APIs.",
-    prompt: "Use Google Workspace APIs. Send Authorization: Bearer ${tokens.google}. Max 5 concurrent requests.",
+    prompt: "Use Google Workspace APIs. Send Authorization: Bearer ${params.google}. Max 5 concurrent requests.",
     questions: [
       "List my unread Gmail messages in the inbox",
       "What events do I have tomorrow?",
@@ -68,20 +83,23 @@ export const demos = [
       "What are the largest emails that I can delete?",
       "Create a lunch meeting tomorrow at 12 noon for 30 minutes",
     ],
-    token: {
-      label: "Google OAuth token",
-      link: "https://developers.google.com/oauthplayground/",
-      required: true,
-      key: "google",
-      oauth: {
-        provider: "google",
-        // root.node@gmail.com | Project: Personal mail etc. OAuth Client: Web apps
-        // https://console.cloud.google.com/auth/clients/872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleusercontent.com?inv=1&invt=AbzTOQ&project=encoded-ensign-221
-        clientId: "872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleusercontent.com",
-        scope:
-          "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/drive.readonly",
+    params: [
+      {
+        label: "Google OAuth token",
+        link: "https://developers.google.com/oauthplayground/",
+        required: true,
+        key: "google",
+        type: "password",
+        oauth: {
+          provider: "google",
+          // root.node@gmail.com | Project: Personal mail etc. OAuth Client: Web apps
+          // https://console.cloud.google.com/auth/clients/872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleusercontent.com?inv=1&invt=AbzTOQ&project=encoded-ensign-221
+          clientId: "872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleusercontent.com",
+          scope:
+            "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/drive.readonly",
+        },
       },
-    },
+    ],
   },
   {
     icon: "book",
@@ -220,19 +238,22 @@ Single entity responses return the object directly.
       "Identify journals that published more than 50 articles on 'artificial intelligence' in 2023 and have a 2-year mean citedness (impact factor) greater than 5.",
       "What percentage of works published by Elsevier (identify via CrossRef member ID) in 2023 are Gold Open Access according to OpenAlex?",
     ],
-    token: {
-      label: "Crossref API token",
-      link: "https://crossref.org/for-developers/",
-      required: false,
-      key: "crossref",
-    },
+    params: [
+      {
+        label: "Crossref API token",
+        link: "https://crossref.org/for-developers/",
+        required: false,
+        key: "crossref",
+        type: "password",
+      },
+    ],
   },
   {
     icon: "kanban",
     title: "JIRA API",
     description: "Query JIRA issues, projects, and workflows.",
     prompt:
-      "Use the Atlassian JIRA REST API. Format JQL queries correctly and use the appropriate endpoints. Send Authorization: Bearer ${tokens.jira}",
+      "Use the Atlassian JIRA REST API. Format JQL queries correctly and use the appropriate endpoints. Send Authorization: Bearer ${params.jira}",
     questions: [
       "List all open bugs in project XYZ",
       "Show me the issues assigned to me",
@@ -240,66 +261,78 @@ Single entity responses return the object directly.
       "Find all critical issues in the backlog",
       "Show the workflow history for issue PROJ-123",
     ],
-    token: {
-      label: "JIRA API token",
-      link: "https://id.atlassian.com/manage-profile/security/api-tokens",
-      required: true,
-      key: "jira",
-    },
+    params: [
+      {
+        label: "JIRA API token",
+        link: "https://id.atlassian.com/manage-profile/security/api-tokens",
+        required: true,
+        key: "jira",
+        type: "password",
+      },
+    ],
   },
   {
     icon: "search",
     title: "Google Custom Search",
     description: "Search the web with a Custom Search Engine.",
     prompt:
-      "Use Google Custom Search JSON API at https://www.googleapis.com/customsearch/v1. Send key=${tokens.cse} and your cx ID along with q, num and other params. Results come in items[] with title, link and snippet.",
+      "Use Google Custom Search JSON API at https://www.googleapis.com/customsearch/v1. Send key=${params.cse} and your cx ID along with q, num and other params. Results come in items[] with title, link and snippet.",
     questions: [
       "Search the web for tutorials on the Fetch API",
       "Find recent news about AI policy",
       "Show images of the Eiffel Tower",
     ],
-    token: {
-      label: "Google CSE API key",
-      link: "https://developers.google.com/custom-search/v1/introduction",
-      required: true,
-      key: "cse",
-    },
+    params: [
+      {
+        label: "Google CSE API key",
+        link: "https://developers.google.com/custom-search/v1/introduction",
+        required: true,
+        key: "cse",
+        type: "password",
+      },
+    ],
   },
   {
     icon: "search-heart",
     title: "SerpApi",
     description: "Retrieve Google search results from SerpApi.",
     prompt:
-      "Use https://serpapi.com/search.json with engine=google, q and api_key=${tokens.serpapi}. Optional params like location, num or start control the results. Parse organic_results[].",
+      "Use https://serpapi.com/search.json with engine=google, q and api_key=${params.serpapi}. Optional params like location, num or start control the results. Parse organic_results[].",
     questions: [
       "Top Google results for best programming laptop 2024",
       "Latest news about OpenAI stock",
       "Find coffee shops in New York",
     ],
-    token: {
-      label: "SerpApi key",
-      link: "https://serpapi.com/manage-api-key",
-      required: true,
-      key: "serpapi",
-    },
+    params: [
+      {
+        label: "SerpApi key",
+        link: "https://serpapi.com/manage-api-key",
+        required: true,
+        key: "serpapi",
+        type: "password",
+      },
+    ],
   },
   {
     icon: "router",
     title: "OpenRouter",
     description: "Call models via the OpenRouter API.",
     prompt:
-      "Use POST https://openrouter.ai/api/v1/chat/completions with Authorization: Bearer ${tokens.openrouter}. Include Referer and X-Title headers. Choose the model parameter to pick a provider.",
+      "Use POST https://openrouter.ai/api/v1/chat/completions with Authorization: Bearer ${params.openrouter}. Include Referer and X-Title headers. Choose the model parameter to pick a provider.",
     questions: [
       "Summarize https://example.com",
       "Explain quantum computing in simple terms",
       "Translate Good morning to French",
     ],
-    token: {
-      label: "OpenRouter API key",
-      link: "https://openrouter.ai/settings/keys",
-      required: true,
-      key: "openrouter",
-    },
+    params: [
+      {
+        label: "OpenRouter API key",
+        link: "https://openrouter.ai/settings/keys",
+        required: true,
+        key: "openrouter",
+        type: "password",
+      },
+    ],
   },
   {
     icon: "globe2",
@@ -312,12 +345,15 @@ Single entity responses return the object directly.
       "Give the intro for Python (programming language)",
       "List sections of the New York City page",
     ],
-    token: {
-      label: "Wikipedia API token",
-      link: "https://www.mediawiki.org/wiki/API:Main_page",
-      required: false,
-      key: "wikipedia",
-    },
+    params: [
+      {
+        label: "Wikipedia API token",
+        link: "https://www.mediawiki.org/wiki/API:Main_page",
+        required: false,
+        key: "wikipedia",
+        type: "password",
+      },
+    ],
   },
   {
     icon: "database",
@@ -326,26 +362,55 @@ Single entity responses return the object directly.
     prompt:
       "Use https://www.wikidata.org/w/api.php. Search via action=wbsearchentities&search=<term>&language=en and fetch details with action=wbgetentities&ids=<id>. No auth needed.",
     questions: ["Find the Wikidata ID for Elon Musk", "Get the birth date of Q42", "List properties of Q90"],
-    token: {
-      label: "Wikidata API token",
-      link: "https://www.wikidata.org/wiki/Wikidata:Data_access",
-      required: false,
-      key: "wikidata",
-    },
+    params: [
+      {
+        label: "Wikidata API token",
+        link: "https://www.wikidata.org/wiki/Wikidata:Data_access",
+        required: false,
+        key: "wikidata",
+        type: "password",
+      },
+    ],
   },
   {
     icon: "film",
     title: "TMDB",
     description: "Discover movies and TV shows with The Movie Database.",
     prompt:
-      "Use https://api.themoviedb.org/3. Send Authorization: Bearer ${tokens.tmdb}. Search via /search/movie?query=<term> and get details from /movie/<id>.",
+      "Use https://api.themoviedb.org/3. Send Authorization: Bearer ${params.tmdb}. Search via /search/movie?query=<term> and get details from /movie/<id>.",
     questions: ["Popular movies this week", "Search for movies about space", "Details for the movie Inception"],
-    token: {
-      label: "TMDB API key",
-      link: "https://www.themoviedb.org/settings/api",
-      required: true,
-      key: "tmdb",
-    },
+    params: [
+      {
+        label: "TMDB API key",
+        link: "https://www.themoviedb.org/settings/api",
+        required: true,
+        key: "tmdb",
+        type: "password",
+      },
+    ],
+  },
+  {
+    icon: "h-circle",
+    title: "HubSpot API",
+    description: "Manage contacts and deals with HubSpot.",
+    prompt:
+      "Use HubSpot API. Send Authorization: Bearer ${params.hubspotToken}. hapikey=${params.hubspotClientId}",
+    questions: ["List contacts created last week", "Show total deals amount by stage"],
+    params: [
+      {
+        label: "HubSpot API token",
+        link: "https://developers.hubspot.com/docs/api/overview",
+        required: true,
+        key: "hubspotToken",
+        type: "password",
+      },
+      {
+        label: "HubSpot client ID",
+        key: "hubspotClientId",
+        type: "text",
+        required: false,
+      },
+    ],
   },
 ];
 
@@ -379,7 +444,7 @@ export async function run(params) {
 }
 \`\`\`
 
-The user will ALWAYS call \`result = await run({tokens})\` where \`tokens\` is an object with keys for each API and share the result (or error).
+The user will ALWAYS call \`result = await run({params})\` where \`params\` is an object with keys for each API and share the result (or error).
 
 Do NOT forget to wrap in \`\`\`js ... \`\`\`
 

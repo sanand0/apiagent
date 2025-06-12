@@ -89,38 +89,38 @@ function updateSelection() {
   );
 
   render(
-    apis.map(
-      (api, i) => html`
-        <div class="mb-2">
-          <label for="token-${i}" class="form-label d-flex justify-content-between">
-            <span>${api.token.label}${api.token.required ? html`<span class="text-danger">*</span>` : ""}</span>
-            ${api.token.oauth
-              ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button-${i}">
-                  Sign in
-                </button>`
-              : html`<a href="${api.token.link}" target="_blank" rel="noopener"
-                  >Get token <i class="bi bi-box-arrow-up-right"></i
-                ></a>`}
-          </label>
-          <input
-            type="password"
-            class="form-control"
-            id="token-${api.token.key}"
-            name="token-${api.token.key}"
-            placeholder="Enter ${api.token.label}"
-            ${api.token.required ? "required" : ""}
-          />
-        </div>
-      `,
+    apis.flatMap((api) =>
+      api.params.map(
+        (p) =>
+          html`<div class="mb-2">
+            <label for="param-${p.key}" class="form-label d-flex justify-content-between">
+              <span>${p.label}${p.required ? html`<span class="text-danger">*</span>` : ""}</span>
+              ${p.oauth
+                ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button-${p.key}">
+                    Sign in
+                  </button>`
+                : p.link
+                  ? html`<a href="${p.link}" target="_blank" rel="noopener"
+                      >Get token <i class="bi bi-box-arrow-up-right"></i
+                    ></a>`
+                  : ""}
+            </label>
+            <input
+              type="${p.type || "text"}"
+              class="form-control"
+              id="param-${p.key}"
+              placeholder="Enter ${p.label}"
+              ${p.required ? "required" : ""}
+            />
+          </div>`,
+      ),
     ),
     $tokenInputs,
   );
 
   formState.restore();
 
-  apis.forEach((api, i) => {
-    if (api.token.oauth) initOAuth(api.token, i);
-  });
+  apis.forEach((api) => api.params.filter((p) => p.oauth).forEach(initOAuth));
 
   $systemPrompt.value = apis.map((api) => api.prompt).join("\n\n");
   $systemPrompt.dispatchEvent(new Event("change", { bubbles: true }));
@@ -128,8 +128,8 @@ function updateSelection() {
   messages.splice(0, messages.length);
   renderSteps(messages);
 }
-async function initOAuth(token, index) {
-  if (token.oauth.provider === "google") {
+async function initOAuth(param) {
+  if (param.oauth.provider === "google") {
     if (!window.google || !google.accounts)
       await new Promise((resolve, reject) => {
         const script = document.createElement("script");
@@ -138,12 +138,12 @@ async function initOAuth(token, index) {
         script.onerror = reject;
         document.head.appendChild(script);
       });
-    const button = document.getElementById(`oauth-button-${index}`);
+    const button = document.getElementById(`oauth-button-${param.key}`);
     const tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: token.oauth.clientId,
-      scope: token.oauth.scope,
+      client_id: param.oauth.clientId,
+      scope: param.oauth.scope,
       callback: (resp) => {
-        const input = document.getElementById(`token-${token.key}`);
+        const input = document.getElementById(`param-${param.key}`);
         input.value = resp.access_token;
         input.dispatchEvent(new Event("change", { bubbles: true }));
       },
@@ -234,12 +234,14 @@ $taskForm.addEventListener("submit", async (e) => {
     }
     messages.push({ role: "user", name: "result", content: "Running code..." });
     renderSteps(messages);
-    const tokens = {};
+    const params = {};
     selectedApis.forEach((i) => {
-      tokens[demos[i].token.key] = document.getElementById(`token-${demos[i].token.key}`)?.value || "";
+      demos[i].params.forEach((p) => {
+        params[p.key] = document.getElementById(`param-${p.key}`)?.value || "";
+      });
     });
     try {
-      const result = await module.run({ tokens });
+      const result = await module.run(params);
       messages.at(-1).content = JSON.stringify(result, null, 2);
     } catch (error) {
       messages.at(-1).name = "error";
