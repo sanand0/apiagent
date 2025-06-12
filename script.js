@@ -45,12 +45,7 @@ function renderApiCards() {
               <i class="bi bi-${demo.icon} fs-1 mb-3"></i>
               <h5 class="card-title">${demo.title}</h5>
               <p class="card-text">${demo.description}</p>
-              <button
-                class="btn btn-outline-primary select-api"
-                data-index="${index}"
-              >
-                Select
-              </button>
+              <button class="btn btn-outline-primary select-api" data-index="${index}">Select</button>
             </div>
           </div>
         </div>
@@ -88,12 +83,7 @@ function updateSelection() {
       .flatMap((api) => api.questions)
       .map(
         (q) =>
-          html`<button
-            type="button"
-            class="list-group-item list-group-item-action example-question"
-          >
-            ${q}
-          </button>`,
+          html`<button type="button" class="list-group-item list-group-item-action example-question">${q}</button>`,
       ),
     $exampleQuestions,
   );
@@ -101,23 +91,28 @@ function updateSelection() {
   render(
     apis.flatMap((api) =>
       api.params.map(
-        (p) => html`<div class="mb-2">
-          <label for="param-${p.key}" class="form-label d-flex justify-content-between">
-            <span>${p.label}${p.required ? html`<span class="text-danger">*</span>` : ""}</span>
-            ${p.oauth
-              ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button-${p.key}">Sign in</button>`
-              : p.link
-                ? html`<a href="${p.link}" target="_blank" rel="noopener">Get token <i class="bi bi-box-arrow-up-right"></i></a>`
-                : ""}
-          </label>
-          <input
-            type="${p.type || "text"}"
-            class="form-control"
-            id="param-${p.key}"
-            placeholder="Enter ${p.label}"
-            ${p.required ? "required" : ""}
-          />
-        </div>`,
+        (p) =>
+          html`<div class="mb-2">
+            <label for="param-${p.key}" class="form-label d-flex justify-content-between">
+              <span>${p.label}${p.required ? html`<span class="text-danger">*</span>` : ""}</span>
+              ${p.oauth
+                ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button-${p.key}">
+                    Sign in
+                  </button>`
+                : p.link
+                  ? html`<a href="${p.link}" target="_blank" rel="noopener"
+                      >Get token <i class="bi bi-box-arrow-up-right"></i
+                    ></a>`
+                  : ""}
+            </label>
+            <input
+              type="${p.type || "text"}"
+              class="form-control"
+              id="param-${p.key}"
+              placeholder="Enter ${p.label}"
+              ${p.required ? "required" : ""}
+            />
+          </div>`,
       ),
     ),
     $tokenInputs,
@@ -169,10 +164,7 @@ $exampleQuestions.addEventListener("click", (e) => {
 });
 
 globalThis.customFetch = function (url, ...args) {
-  render(
-    html`Fetching <a href="${url}" target="_blank" rel="noopener">${url}</a>`,
-    $status,
-  );
+  render(html`Fetching <a href="${url}" target="_blank" rel="noopener">${url}</a>`, $status);
   $status.classList.remove("d-none");
   return fetch(url, ...args);
 };
@@ -205,10 +197,7 @@ $taskForm.addEventListener("submit", async (e) => {
         body: JSON.stringify({
           model,
           stream: true,
-          messages: [
-            { role: "system", content: agentPrompt($systemPrompt.value) },
-            ...llmMessages,
-          ],
+          messages: [{ role: "system", content: agentPrompt($systemPrompt.value) }, ...llmMessages],
         }),
       })) {
         message.content = event.content ?? "";
@@ -248,10 +237,7 @@ $taskForm.addEventListener("submit", async (e) => {
     })(message.content);
     let module;
     try {
-      const blob = new Blob(
-        [`const fetch = globalThis.customFetch;\n${code}`],
-        { type: "text/javascript" },
-      );
+      const blob = new Blob([`const fetch = globalThis.customFetch;\n${code}`], { type: "text/javascript" });
       module = await import(URL.createObjectURL(blob));
     } catch (error) {
       messages.push({ role: "user", name: "error", content: error.stack });
@@ -276,11 +262,7 @@ $taskForm.addEventListener("submit", async (e) => {
     $status.classList.add("d-none");
     renderSteps(messages);
 
-    const validationMessages = [
-      ...messages.filter((m) => m.name === "user"),
-      messages.at(-2),
-      messages.at(-1),
-    ];
+    const validationMessages = [...messages.filter((m) => m.name === "user"), messages.at(-2), messages.at(-1)];
     let validationMessage = {
       role: "assistant",
       name: "validator",
@@ -292,10 +274,7 @@ $taskForm.addEventListener("submit", async (e) => {
       body: JSON.stringify({
         model,
         stream: true,
-        messages: [
-          { role: "system", content: validatorPrompt },
-          ...validationMessages,
-        ],
+        messages: [{ role: "system", content: validatorPrompt }, ...validationMessages],
       }),
     })) {
       validationMessage.content = event.content ?? "";
@@ -334,16 +313,11 @@ function renderSteps(steps) {
     steps.map(({ name, content }, i) => {
       const stepNum = i + 1;
       let markdown =
-        name == "result"
-          ? "```json\n" + content + "\n```"
-          : name == "error"
-            ? "```\n" + content + "\n```"
-            : content;
+        name == "result" ? "```json\n" + content + "\n```" : name == "error" ? "```\n" + content + "\n```" : content;
       return html`
         <div class="card mb-3">
           <div
-            class="card-header ${colorMap[name] ||
-            "bg-secondary"} text-white d-flex align-items-center"
+            class="card-header ${colorMap[name] || "bg-secondary"} text-white d-flex align-items-center"
             data-bs-toggle="collapse"
             data-bs-target="#step-${stepNum}"
             role="button"
@@ -355,9 +329,7 @@ function renderSteps(steps) {
             <i class="bi bi-chevron-down ms-auto"></i>
           </div>
           <div class="collapse show" id="step-${stepNum}">
-            <div class="card-body">
-              ${unsafeHTML(marked.parse(markdown ?? ""))}
-            </div>
+            <div class="card-body">${unsafeHTML(marked.parse(markdown ?? ""))}</div>
           </div>
         </div>
       `;
