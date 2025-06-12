@@ -45,7 +45,12 @@ function renderApiCards() {
               <i class="bi bi-${demo.icon} fs-1 mb-3"></i>
               <h5 class="card-title">${demo.title}</h5>
               <p class="card-text">${demo.description}</p>
-              <button class="btn btn-outline-primary select-api" data-index="${index}">Select</button>
+              <button
+                class="btn btn-outline-primary select-api"
+                data-index="${index}"
+              >
+                Select
+              </button>
             </div>
           </div>
         </div>
@@ -83,44 +88,44 @@ function updateSelection() {
       .flatMap((api) => api.questions)
       .map(
         (q) =>
-          html`<button type="button" class="list-group-item list-group-item-action example-question">${q}</button>`,
+          html`<button
+            type="button"
+            class="list-group-item list-group-item-action example-question"
+          >
+            ${q}
+          </button>`,
       ),
     $exampleQuestions,
   );
 
   render(
-    apis.map(
-      (api, i) => html`
-        <div class="mb-2">
-          <label for="token-${i}" class="form-label d-flex justify-content-between">
-            <span>${api.token.label}${api.token.required ? html`<span class="text-danger">*</span>` : ""}</span>
-            ${api.token.oauth
-              ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button-${i}">
-                  Sign in
-                </button>`
-              : html`<a href="${api.token.link}" target="_blank" rel="noopener"
-                  >Get token <i class="bi bi-box-arrow-up-right"></i
-                ></a>`}
+    apis.flatMap((api) =>
+      api.params.map(
+        (p) => html`<div class="mb-2">
+          <label for="param-${p.key}" class="form-label d-flex justify-content-between">
+            <span>${p.label}${p.required ? html`<span class="text-danger">*</span>` : ""}</span>
+            ${p.oauth
+              ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button-${p.key}">Sign in</button>`
+              : p.link
+                ? html`<a href="${p.link}" target="_blank" rel="noopener">Get token <i class="bi bi-box-arrow-up-right"></i></a>`
+                : ""}
           </label>
           <input
-            type="password"
+            type="${p.type || "text"}"
             class="form-control"
-            id="token-${api.token.key}"
-            name="token-${api.token.key}"
-            placeholder="Enter ${api.token.label}"
-            ${api.token.required ? "required" : ""}
+            id="param-${p.key}"
+            placeholder="Enter ${p.label}"
+            ${p.required ? "required" : ""}
           />
-        </div>
-      `,
+        </div>`,
+      ),
     ),
     $tokenInputs,
   );
 
   formState.restore();
 
-  apis.forEach((api, i) => {
-    if (api.token.oauth) initOAuth(api.token, i);
-  });
+  apis.forEach((api) => api.params.filter((p) => p.oauth).forEach(initOAuth));
 
   $systemPrompt.value = apis.map((api) => api.prompt).join("\n\n");
   $systemPrompt.dispatchEvent(new Event("change", { bubbles: true }));
@@ -128,8 +133,8 @@ function updateSelection() {
   messages.splice(0, messages.length);
   renderSteps(messages);
 }
-async function initOAuth(token, index) {
-  if (token.oauth.provider === "google") {
+async function initOAuth(param) {
+  if (param.oauth.provider === "google") {
     if (!window.google || !google.accounts)
       await new Promise((resolve, reject) => {
         const script = document.createElement("script");
@@ -138,12 +143,12 @@ async function initOAuth(token, index) {
         script.onerror = reject;
         document.head.appendChild(script);
       });
-    const button = document.getElementById(`oauth-button-${index}`);
+    const button = document.getElementById(`oauth-button-${param.key}`);
     const tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: token.oauth.clientId,
-      scope: token.oauth.scope,
+      client_id: param.oauth.clientId,
+      scope: param.oauth.scope,
       callback: (resp) => {
-        const input = document.getElementById(`token-${token.key}`);
+        const input = document.getElementById(`param-${param.key}`);
         input.value = resp.access_token;
         input.dispatchEvent(new Event("change", { bubbles: true }));
       },
@@ -164,7 +169,10 @@ $exampleQuestions.addEventListener("click", (e) => {
 });
 
 globalThis.customFetch = function (url, ...args) {
-  render(html`Fetching <a href="${url}" target="_blank" rel="noopener">${url}</a>`, $status);
+  render(
+    html`Fetching <a href="${url}" target="_blank" rel="noopener">${url}</a>`,
+    $status,
+  );
   $status.classList.remove("d-none");
   return fetch(url, ...args);
 };
@@ -179,7 +187,10 @@ $taskForm.addEventListener("submit", async (e) => {
   const apiKey = document.getElementById("apiKeyInput").value;
   const model = document.getElementById("model").value;
   const attempts = document.getElementById("attempts").value;
-  const request = { method: "POST", headers: { "Content-Type": "application/json" } };
+  const request = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  };
   if (apiKey) request.headers["Authorization"] = `Bearer ${apiKey}`;
   else request.credentials = "include";
 
@@ -194,11 +205,19 @@ $taskForm.addEventListener("submit", async (e) => {
         body: JSON.stringify({
           model,
           stream: true,
-          messages: [{ role: "system", content: agentPrompt($systemPrompt.value) }, ...llmMessages],
+          messages: [
+            { role: "system", content: agentPrompt($systemPrompt.value) },
+            ...llmMessages,
+          ],
         }),
       })) {
         message.content = event.content ?? "";
-        if (event.error) messages.push({ role: "user", name: "error", content: JSON.stringify(event) });
+        if (event.error)
+          messages.push({
+            role: "user",
+            name: "error",
+            content: JSON.stringify(event),
+          });
         renderSteps(messages);
         if (event.error) return;
       }
@@ -218,14 +237,21 @@ $taskForm.addEventListener("submit", async (e) => {
       try {
         return [...content.matchAll(/```js(.*?)```/gs)][0].at(-1);
       } catch (error) {
-        messages.push({ role: "user", name: "error", content: "No JS code block to run" });
+        messages.push({
+          role: "user",
+          name: "error",
+          content: "No JS code block to run",
+        });
         renderSteps(messages);
         return;
       }
     })(message.content);
     let module;
     try {
-      const blob = new Blob([`const fetch = globalThis.customFetch;\n${code}`], { type: "text/javascript" });
+      const blob = new Blob(
+        [`const fetch = globalThis.customFetch;\n${code}`],
+        { type: "text/javascript" },
+      );
       module = await import(URL.createObjectURL(blob));
     } catch (error) {
       messages.push({ role: "user", name: "error", content: error.stack });
@@ -234,12 +260,14 @@ $taskForm.addEventListener("submit", async (e) => {
     }
     messages.push({ role: "user", name: "result", content: "Running code..." });
     renderSteps(messages);
-    const tokens = {};
+    const params = {};
     selectedApis.forEach((i) => {
-      tokens[demos[i].token.key] = document.getElementById(`token-${demos[i].token.key}`)?.value || "";
+      demos[i].params.forEach((p) => {
+        params[p.key] = document.getElementById(`param-${p.key}`)?.value || "";
+      });
     });
     try {
-      const result = await module.run({ tokens });
+      const result = await module.run({ params });
       messages.at(-1).content = JSON.stringify(result, null, 2);
     } catch (error) {
       messages.at(-1).name = "error";
@@ -248,19 +276,35 @@ $taskForm.addEventListener("submit", async (e) => {
     $status.classList.add("d-none");
     renderSteps(messages);
 
-    const validationMessages = [...messages.filter((m) => m.name === "user"), messages.at(-2), messages.at(-1)];
-    let validationMessage = { role: "assistant", name: "validator", content: "" };
+    const validationMessages = [
+      ...messages.filter((m) => m.name === "user"),
+      messages.at(-2),
+      messages.at(-1),
+    ];
+    let validationMessage = {
+      role: "assistant",
+      name: "validator",
+      content: "",
+    };
     messages.push(validationMessage);
     for await (const event of asyncLLM(`${baseUrl}/chat/completions`, {
       ...request,
       body: JSON.stringify({
         model,
         stream: true,
-        messages: [{ role: "system", content: validatorPrompt }, ...validationMessages],
+        messages: [
+          { role: "system", content: validatorPrompt },
+          ...validationMessages,
+        ],
       }),
     })) {
       validationMessage.content = event.content ?? "";
-      if (event.error) messages.push({ role: "user", name: "error", content: JSON.stringify(event) });
+      if (event.error)
+        messages.push({
+          role: "user",
+          name: "error",
+          content: JSON.stringify(event),
+        });
       renderSteps(messages);
       if (event.error) return;
     }
@@ -290,11 +334,16 @@ function renderSteps(steps) {
     steps.map(({ name, content }, i) => {
       const stepNum = i + 1;
       let markdown =
-        name == "result" ? "```json\n" + content + "\n```" : name == "error" ? "```\n" + content + "\n```" : content;
+        name == "result"
+          ? "```json\n" + content + "\n```"
+          : name == "error"
+            ? "```\n" + content + "\n```"
+            : content;
       return html`
         <div class="card mb-3">
           <div
-            class="card-header ${colorMap[name] || "bg-secondary"} text-white d-flex align-items-center"
+            class="card-header ${colorMap[name] ||
+            "bg-secondary"} text-white d-flex align-items-center"
             data-bs-toggle="collapse"
             data-bs-target="#step-${stepNum}"
             role="button"
@@ -306,7 +355,9 @@ function renderSteps(steps) {
             <i class="bi bi-chevron-down ms-auto"></i>
           </div>
           <div class="collapse show" id="step-${stepNum}">
-            <div class="card-body">${unsafeHTML(marked.parse(markdown ?? ""))}</div>
+            <div class="card-body">
+              ${unsafeHTML(marked.parse(markdown ?? ""))}
+            </div>
           </div>
         </div>
       `;
