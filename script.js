@@ -253,7 +253,7 @@ $taskForm.addEventListener("submit", async (e) => {
       });
     });
     try {
-      const result = await module.run({ params });
+      const result = await module.run(params);
       messages.at(-1).content = JSON.stringify(result, null, 2);
     } catch (error) {
       messages.at(-1).name = "error";

@@ -49,7 +49,7 @@ export const demos = [
     icon: "graph-up-arrow",
     title: "Google Analytics",
     description: "Explore your website traffic and user behavior with Google Analytics.",
-    prompt: "Use Google Analytics Data API. Send Authorization: Bearer ${params.ga}",
+    prompt: "Use Google Analytics Data API for property ${params.gaPropertyId}. Authorization: Bearer ${params.ga}",
     questions: [
       "How many daily active users has your Android app had in the last week?",
       "How many page views the top 10 pages on your site had in the last 28 days?",
@@ -394,7 +394,7 @@ Single entity responses return the object directly.
     title: "HubSpot API",
     description: "Manage contacts and deals with HubSpot.",
     prompt:
-      "Use HubSpot API. Send Authorization: Bearer ${params.hubspotToken}. Use hapikey=${params.hubspotClientId} when required.",
+      "Use HubSpot API. Send Authorization: Bearer ${params.hubspotToken}. hapikey=${params.hubspotClientId}",
     questions: ["List contacts created last week", "Show total deals amount by stage"],
     params: [
       {
@@ -444,7 +444,7 @@ export async function run(params) {
 }
 \`\`\`
 
-The user will ALWAYS call \`result = await run({params})\` where `params` is an object with keys for each API and share the result (or error).
+The user will ALWAYS call \`result = await run({params})\` where \`params\` is an object with keys for each API and share the result (or error).
 
 Do NOT forget to wrap in \`\`\`js ... \`\`\`
 
