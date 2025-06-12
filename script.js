@@ -179,10 +179,7 @@ $taskForm.addEventListener("submit", async (e) => {
   const apiKey = document.getElementById("apiKeyInput").value;
   const model = document.getElementById("model").value;
   const attempts = document.getElementById("attempts").value;
-  const request = {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-  };
+  const request = { method: "POST", headers: { "Content-Type": "application/json" } };
   if (apiKey) request.headers["Authorization"] = `Bearer ${apiKey}`;
   else request.credentials = "include";
 
@@ -201,12 +198,7 @@ $taskForm.addEventListener("submit", async (e) => {
         }),
       })) {
         message.content = event.content ?? "";
-        if (event.error)
-          messages.push({
-            role: "user",
-            name: "error",
-            content: JSON.stringify(event),
-          });
+        if (event.error) messages.push({ role: "user", name: "error", content: JSON.stringify(event) });
         renderSteps(messages);
         if (event.error) return;
       }
@@ -226,11 +218,7 @@ $taskForm.addEventListener("submit", async (e) => {
       try {
         return [...content.matchAll(/```js(.*?)```/gs)][0].at(-1);
       } catch (error) {
-        messages.push({
-          role: "user",
-          name: "error",
-          content: "No JS code block to run",
-        });
+        messages.push({ role: "user", name: "error", content: "No JS code block to run" });
         renderSteps(messages);
         return;
       }
@@ -263,11 +251,7 @@ $taskForm.addEventListener("submit", async (e) => {
     renderSteps(messages);
 
     const validationMessages = [...messages.filter((m) => m.name === "user"), messages.at(-2), messages.at(-1)];
-    let validationMessage = {
-      role: "assistant",
-      name: "validator",
-      content: "",
-    };
+    let validationMessage = { role: "assistant", name: "validator", content: "" };
     messages.push(validationMessage);
     for await (const event of asyncLLM(`${baseUrl}/chat/completions`, {
       ...request,
@@ -278,12 +262,7 @@ $taskForm.addEventListener("submit", async (e) => {
       }),
     })) {
       validationMessage.content = event.content ?? "";
-      if (event.error)
-        messages.push({
-          role: "user",
-          name: "error",
-          content: JSON.stringify(event),
-        });
+      if (event.error) messages.push({ role: "user", name: "error", content: JSON.stringify(event) });
       renderSteps(messages);
       if (event.error) return;
     }
