@@ -7,7 +7,7 @@ API Agent is an interactive web application that allows users to query APIs thro
 ## Features
 
 - **Natural Language Interface**: Ask questions in plain English to interact with APIs
-- **Multiple API Support**: Connect to GitHub, StackOverflow, Google Workspace, Jira, and more
+- **Multiple API Support**: Connect to GitHub, GitLab, StackOverflow, Google Workspace, Jira, and more
 - **Real-time Data**: Access up-to-date information from various platforms
 - **Code Generation**: Automatically generates and executes JavaScript code for API calls
 - **Result Validation**: Verifies that the results answer the original question
@@ -41,12 +41,18 @@ API Agent is an interactive web application that allows users to query APIs thro
 - Modern web browser (Chrome, Firefox, Safari, Edge)
 - API tokens (optional, but recommended for higher rate limits):
   - [GitHub Token](https://github.com/settings/tokens)
+  - [GitLab Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) and your [GitLab URL](https://docs.gitlab.com/ee/api/index.html#gitlab-api-endpoint-url) if self-hosted
   - [StackOverflow Token](https://stackapps.com/apps/oauth/register)
   - [Google OAuth Token](https://developers.google.com/oauthplayground/)
   - [Jira Token](https://id.atlassian.com/manage-profile/security/api-tokens)
   - [Google Custom Search API Key](https://developers.google.com/custom-search/v1/introduction)
   - [SerpApi Key](https://serpapi.com/manage-api-key)
   - [OpenRouter API Key](https://openrouter.ai/settings/keys)
+
+### GitLab API Usage
+
+The GitLab REST API lets you list projects, inspect issues and merge requests, and track activity.
+Use `/projects` to list repositories, `/projects/:id/repository/commits?since=<date>` to see recent commits, and `/users/:username/events` to view user actions.
 
 ### Local Setup
 

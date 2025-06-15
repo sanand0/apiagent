@@ -23,6 +23,36 @@ export const demos = [
     ],
   },
   {
+    icon: "gitlab",
+    title: "GitLab API",
+    description: "Query GitLab projects, issues and merge requests.",
+    prompt:
+      "Use GitLab REST API at ${params.gitlabUrl}. If params.gitlabToken add Private-Token: ${params.gitlabToken}. List projects via /projects?membership=true. Track repo activity via /projects/:id/repository/commits?since=<ISO date> and user activity via /users/:user/events",
+    questions: [
+      "Show my GitLab projects",
+      "List commits in gitlab-org/gitlab since 2024-01-01",
+      "Merge requests updated today in my repo",
+      "Issues assigned to me",
+      "Events for user @root this week",
+    ],
+    params: [
+      {
+        label: "GitLab token",
+        link: "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html",
+        required: false,
+        key: "gitlabToken",
+        type: "password",
+      },
+      {
+        label: "GitLab URL",
+        link: "https://docs.gitlab.com/ee/api/index.html#gitlab-api-endpoint-url",
+        required: false,
+        key: "gitlabUrl",
+        type: "text",
+      },
+    ],
+  },
+  {
     icon: "stack-overflow",
     title: "StackOverflow API",
     description: "Search questions, answers, and users on StackOverflow.",
@@ -393,8 +423,7 @@ Single entity responses return the object directly.
     icon: "h-circle",
     title: "HubSpot API",
     description: "Manage contacts and deals with HubSpot.",
-    prompt:
-      "Use HubSpot API. Send Authorization: Bearer ${params.hubspotToken}. hapikey=${params.hubspotClientId}",
+    prompt: "Use HubSpot API. Send Authorization: Bearer ${params.hubspotToken}. hapikey=${params.hubspotClientId}",
     questions: ["List contacts created last week", "Show total deals amount by stage"],
     params: [
       {
