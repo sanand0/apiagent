@@ -25,97 +25,87 @@ marked.use({
 const $taskForm = document.querySelector("#task-form");
 const $results = document.querySelector("#results");
 const $status = document.querySelector("#status");
-const $apiCards = document.querySelector("#api-cards");
+const $apiSidebar = document.querySelector("#api-sidebar");
 const $exampleQuestions = document.querySelector("#example-questions");
-const $tokenInputs = document.querySelector("#token-inputs");
 const $systemPrompt = document.querySelector("#system-prompt");
 
 const formState = saveform("#task-form", { exclude: '[type="file"]' });
 const messages = [];
 const selectedApis = new Set([0]);
 
-// Render API cards based on config
-function renderApiCards() {
+// Render API sidebar based on config
+function renderSidebar() {
   render(
     demos.map(
       (demo, index) => html`
-        <div class="col">
-          <div class="card h-100 api-card" data-index="${index}">
-            <div class="card-body text-center">
-              <i class="bi bi-${demo.icon} fs-1 mb-3"></i>
-              <h5 class="card-title">${demo.title}</h5>
-              <p class="card-text">${demo.description}</p>
-              <button class="btn btn-outline-primary select-api" data-index="${index}">Select</button>
+        <div class="accordion-item ${selectedApis.has(index) ? "border border-success" : ""}">
+          <h2 class="accordion-header">
+            <button
+              class="accordion-button ${selectedApis.has(index) ? "bg-success-subtle" : "collapsed"}"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#api-${index}"
+              aria-expanded="${selectedApis.has(index)}"
+            >
+              <i class="bi bi-${demo.icon} me-2"></i>
+              ${demo.title}
+              ${demo.params.every((p) => !p.required)
+                ? html`<i class="bi bi-globe ms-2" data-bs-toggle="tooltip" title="No API keys required"></i>`
+                : ""}
+            </button>
+          </h2>
+          <div id="api-${index}" class="accordion-collapse collapse ${selectedApis.has(index) ? "show" : ""}" data-index="${index}">
+            <div class="accordion-body">
+              <p>${demo.description}</p>
+              ${demo.params.map(
+                (p) => html`<div class="mb-2">
+                  <label for="param-${p.key}" class="form-label d-flex justify-content-between">
+                    <span>${p.label}${p.required ? html`<span class="text-danger">*</span>` : ""}</span>
+                    ${p.oauth
+                      ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button-${p.key}">Sign in</button>`
+                      : p.link
+                        ? html`<a href="${p.link}" target="_blank" rel="noopener">Get token <i class="bi bi-box-arrow-up-right"></i></a>`
+                        : ""}
+                  </label>
+                  <input type="${p.type || "text"}" class="form-control" id="param-${p.key}" placeholder="Enter ${p.label}" ${p.required ? "required" : ""} />
+                </div>`,
+              )}
             </div>
           </div>
         </div>
       `,
     ),
-    $apiCards,
+    $apiSidebar,
   );
-
-  // Add event listeners to API cards
-  document.querySelectorAll(".select-api").forEach((button) => {
-    button.addEventListener("click", (e) => {
-      const index = parseInt(e.target.dataset.index);
-      toggleApi(index);
-    });
-  });
+  document
+    .querySelectorAll('#api-sidebar [data-bs-toggle="tooltip"]')
+    .forEach((el) => bootstrap.Tooltip.getOrCreateInstance(el));
 }
 
-// Toggle API selection and update the UI
-function toggleApi(index) {
-  if (selectedApis.has(index)) selectedApis.delete(index);
-  else selectedApis.add(index);
+$apiSidebar.addEventListener("show.bs.collapse", (e) => {
+  selectedApis.add(parseInt(e.target.dataset.index));
+  renderSidebar();
   updateSelection();
-}
+});
+
+$apiSidebar.addEventListener("hide.bs.collapse", (e) => {
+  selectedApis.delete(parseInt(e.target.dataset.index));
+  renderSidebar();
+  updateSelection();
+});
 
 function updateSelection() {
   const apis = [...selectedApis].map((i) => demos[i]);
 
-  document.querySelectorAll(".api-card").forEach((card, i) => {
-    if (selectedApis.has(i)) card.classList.add("border-primary", "shadow");
-    else card.classList.remove("border-primary", "shadow");
-  });
-
+  const sample = apis
+    .flatMap((api) => api.questions)
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 6);
   render(
-    apis
-      .flatMap((api) => api.questions)
-      .map(
-        (q) =>
-          html`<button type="button" class="list-group-item list-group-item-action example-question">${q}</button>`,
-      ),
-    $exampleQuestions,
-  );
-
-  render(
-    apis.flatMap((api) =>
-      api.params.map(
-        (p) =>
-          html`<div class="mb-2">
-            <label for="param-${p.key}" class="form-label d-flex justify-content-between">
-              <span>${p.label}${p.required ? html`<span class="text-danger">*</span>` : ""}</span>
-              ${p.oauth
-                ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button-${p.key}">
-                    Sign in
-                  </button>`
-                : p.link
-                  ? html`<a href="${p.link}" target="_blank" rel="noopener"
-                      >Get token <i class="bi bi-box-arrow-up-right"></i
-                    ></a>`
-                  : ""}
-            </label>
-            <input
-              type="${p.type || "text"}"
-              class="form-control"
-              id="param-${p.key}"
-              placeholder="Enter ${p.label}"
-              ${p.required ? "required" : ""}
-            />
-          </div>`,
-      ),
+    sample.map(
+      (q) => html`<button type="button" class="list-group-item list-group-item-action example-question">${q}</button>`,
     ),
-    $tokenInputs,
+    $exampleQuestions,
   );
 
   formState.restore();
@@ -318,5 +308,5 @@ function renderSteps(steps) {
 }
 
 // Initialize the application
-renderApiCards();
+renderSidebar();
 updateSelection();
