@@ -17,6 +17,7 @@
     .hljs {
       padding: 1rem;
     }
+
   </style>
 </head>
 
@@ -58,119 +59,107 @@
       <p>Business teams use API Agent to monitor competitors, track market trends, and gather intelligence without technical expertise. Developers use it to quickly prototype and test API interactions without writing boilerplate code.</p>
     </div>
 
-    <!-- API Selection Cards -->
-    <div class="mx-auto my-4">
-      <div id="api-cards" class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-4 justify-content-center">
-        <!-- API cards will be dynamically inserted here -->
-      </div>
+    <div class="row">
+      <aside class="col-lg-4 col-xl-3">
+        <div id="api-sidebar" class="accordion position-sticky top-0 my-3" style="height: calc(100vh - 4.5rem); overflow-y: auto;"></div>
+      </aside>
+      <main class="col-lg-8 col-xl-9">
+        <form id="task-form" class="narrative mx-auto">
+
+          <div class="my-4 p-4 card rounded-3 shadow-sm">
+            <h3 class="mb-3">Advanced Settings</h3>
+
+            <div class="accordion my-3" id="advancedSettings">
+              <!-- API Key Setting -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apiKeyCollapse" aria-expanded="false" aria-controls="apiKeyCollapse">
+                    <i class="bi bi-key me-2"></i>OpenAI API Key
+                  </button>
+                </h2>
+                <div id="apiKeyCollapse" class="accordion-collapse collapse" data-bs-parent="#advancedSettings">
+                  <div class="accordion-body">
+                    <div class="mb-3">
+                      <label for="apiKeyInput" class="form-label">Enter your OpenAI API Key:</label>
+                      <input type="password" class="form-control" id="apiKeyInput" placeholder="sk-...">
+                      <div class="form-text">Your API key is stored locally in your browser and never sent to our servers.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Base URL Setting -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#baseUrlCollapse" aria-expanded="false" aria-controls="baseUrlCollapse">
+                    <i class="bi bi-key me-2"></i>Base URL
+                  </button>
+                </h2>
+                <div id="baseUrlCollapse" class="accordion-collapse collapse" data-bs-parent="#advancedSettings">
+                  <div class="accordion-body">
+                    <div class="mb-3">
+                      <label for="baseUrlInput" class="form-label">Enter your OpenAI API Base URL:</label>
+                      <input type="text" class="form-control" id="baseUrlInput" value="https://llmfoundry.straive.com/openai/v1" list="baseUrlList">
+                      <datalist id="baseUrlList">
+                        <option value="https://api.openai.com/v1"></option>
+                        <option value="https://llmfoundry.straive.com/openai/v1"></option>
+                        <option value="https://llmfoundry.straivedemo.com/openai/v1"></option>
+                        <option value="https://openrouter.ai/api/v1" disabled></option>
+                        <option value="https://aipipe.org/openai/v1" disabled></option>
+                      </datalist>
+                      <div class="form-text">Your API key is stored locally in your browser and never sent to our servers.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- System Prompt Setting -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#systemPromptCollapse" aria-expanded="false" aria-controls="systemPromptCollapse">
+                    <i class="bi bi-chat-square-text me-2"></i>System Prompt &amp; Model
+                  </button>
+                </h2>
+                <div id="systemPromptCollapse" class="accordion-collapse collapse" data-bs-parent="#advancedSettings">
+                  <div class="accordion-body">
+                    <div class="mb-3">
+                      <label for="system-prompt" class="form-label">Customize the system prompt:</label>
+                      <textarea class="form-control" id="system-prompt" rows="10"></textarea>
+                    </div>
+                    <div class="mb-3">
+                      <label for="model" class="form-label">Choose the model:</label>
+                      <input type="text" class="form-control" id="model" value="gpt-4.1-mini" list="modelList">
+                      <datalist id="modelList">
+                        <option value="gpt-4.1-nano"></option>
+                        <option value="gpt-4.1-mini"></option>
+                        <option value="gpt-4.1"></option>
+                        <option value="gpt-4o"></option>
+                        <option value="o4-mini"></option>
+                      </datalist>
+                    </div>
+                    <div class="mb-3">
+                      <label for="attempts" class="form-label">Number of retry attempts:</label>
+                      <input type="number" class="form-control" id="attempts" value="3">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <h5 class="my-4 mb-3">Sample Questions:</h5>
+          <div id="example-questions" class="list-group my-4"></div>
+
+          <div id="results" class="mx-auto my-3 narrative"></div>
+          <div id="status" class="alert alert-info mx-auto my-3 narrative d-none" role="alert"></div>
+
+          <label for="question" class="form-label">Enter your question:</label>
+          <textarea class="form-control" name="question" id="question" rows="3" placeholder="Ask a question"></textarea>
+          <button type="submit" class="btn btn-primary mt-2">Submit</button>
+        </form>
+      </main>
     </div>
-
-    <form id="task-form" class="narrative mx-auto">
-
-      <div class="my-4 p-4 card rounded-3 shadow-sm">
-        <h3 class="mb-3">Advanced Settings</h3>
-
-        <div class="accordion my-3" id="advancedSettings">
-          <!-- API Key Setting -->
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apiKeyCollapse" aria-expanded="false" aria-controls="apiKeyCollapse">
-                <i class="bi bi-key me-2"></i>OpenAI API Key
-              </button>
-            </h2>
-            <div id="apiKeyCollapse" class="accordion-collapse collapse" data-bs-parent="#advancedSettings">
-              <div class="accordion-body">
-                <div class="mb-3">
-                  <label for="apiKeyInput" class="form-label">Enter your OpenAI API Key:</label>
-                  <input type="password" class="form-control" id="apiKeyInput" placeholder="sk-...">
-                  <div class="form-text">Your API key is stored locally in your browser and never sent to our servers.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Base URL Setting -->
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#baseUrlCollapse" aria-expanded="false" aria-controls="baseUrlCollapse">
-                <i class="bi bi-key me-2"></i>Base URL
-              </button>
-            </h2>
-            <div id="baseUrlCollapse" class="accordion-collapse collapse" data-bs-parent="#advancedSettings">
-              <div class="accordion-body">
-                <div class="mb-3">
-                  <label for="baseUrlInput" class="form-label">Enter your OpenAI API Base URL:</label>
-                  <input type="text" class="form-control" id="baseUrlInput" value="https://llmfoundry.straive.com/openai/v1" list="baseUrlList">
-                  <datalist id="baseUrlList">
-                    <option value="https://api.openai.com/v1"></option>
-                    <option value="https://llmfoundry.straive.com/openai/v1"></option>
-                    <option value="https://llmfoundry.straivedemo.com/openai/v1"></option>
-                    <option value="https://openrouter.ai/api/v1" disabled></option>
-                    <option value="https://aipipe.org/openai/v1" disabled></option>
-                  </datalist>
-                  <div class="form-text">Your API key is stored locally in your browser and never sent to our servers.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- System Prompt Setting -->
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#systemPromptCollapse" aria-expanded="false" aria-controls="systemPromptCollapse">
-                <i class="bi bi-chat-square-text me-2"></i>System Prompt &amp; Model
-              </button>
-            </h2>
-            <div id="systemPromptCollapse" class="accordion-collapse collapse" data-bs-parent="#advancedSettings">
-              <div class="accordion-body">
-                <div class="mb-3">
-                  <label for="system-prompt" class="form-label">Customize the system prompt:</label>
-                  <textarea class="form-control" id="system-prompt" rows="10"></textarea>
-                </div>
-                <div class="mb-3">
-                  <label for="model" class="form-label">Choose the model:</label>
-                  <input type="text" class="form-control" id="model" value="gpt-4.1-mini" list="modelList">
-                  <datalist id="modelList">
-                    <option value="gpt-4.1-nano"></option>
-                    <option value="gpt-4.1-mini"></option>
-                    <option value="gpt-4.1"></option>
-                    <option value="gpt-4o"></option>
-                    <option value="o4-mini"></option>
-                  </datalist>
-                </div>
-                <div class="mb-3">
-                  <label for="attempts" class="form-label">Number of retry attempts:</label>
-                  <input type="number" class="form-control" id="attempts" value="3">
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#tokenCollapse" aria-expanded="true" aria-controls="tokenCollapse">
-                <i class="bi bi-key me-2"></i>API Tokens
-              </button>
-            </h2>
-            <div id="tokenCollapse" class="accordion-collapse collapse show" data-bs-parent="#tokenAccordion">
-              <div class="accordion-body" id="token-inputs">
-                <!-- Token inputs will be dynamically inserted here -->
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <h5 class="my-4 mb-3">Sample Questions:</h5>
-      <div id="example-questions" class="list-group my-4"></div>
-
-      <div id="results" class="mx-auto my-3 narrative"></div>
-      <div id="status" class="alert alert-info mx-auto my-3 narrative d-none" role="alert"></div>
-
-      <label for="question" class="form-label">Enter your question:</label>
-      <input type="text" class="form-control" name="question" id="question" placeholder="Ask a question">
-      <button type="submit" class="btn btn-primary mt-2">Submit</button>
-    </form>
 
     <footer style="height: 50vh"></footer>
   </div>
