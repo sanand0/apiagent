@@ -60,7 +60,7 @@ Use `/projects` to list repositories, `/projects/:id/repository/commits?since=<d
 2. Open `index.html` in your browser
 3. Log in to LLM Foundry when prompted
 4. (Optional) Add your API tokens in the "API Tokens" section
-5. (Optional) Expand the APIs you need and enter tokens if required
+5. (Optional) Open the APIs sidebar and expand the services you need to enter tokens
 
 ## Deployment
 

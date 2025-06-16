@@ -31,7 +31,7 @@ const $systemPrompt = document.querySelector("#system-prompt");
 
 const formState = saveform("#task-form", { exclude: '[type="file"]' });
 const messages = [];
-const selectedApis = new Set([0]);
+const selectedApis = new Set();
 
 function renderApis() {
   render(
@@ -55,7 +55,7 @@ function renderApis() {
               : ""}
           </button>
         </h2>
-        <div id="api-${i}" class="accordion-collapse collapse${i ? "" : " show"}" data-bs-parent="#api-accordion">
+        <div id="api-${i}" class="accordion-collapse collapse${i ? "" : " show"}">
           <div class="accordion-body" id="api-body-${i}"></div>
         </div>
       </div>`;
