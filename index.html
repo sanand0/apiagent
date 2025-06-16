@@ -17,7 +17,6 @@
     .hljs {
       padding: 1rem;
     }
-
   </style>
 </head>
 
@@ -45,25 +44,24 @@
   </nav>
 
   <div class="container-fluid">
-    <h1 class="display-1 my-4 text-center">API Agent</h1>
-    <h2 class="display-6 text-center">Chat with your APIs</h2>
-
-    <div class="mx-auto my-3 narrative">
-      <p>API agent let's you ask questions that can be answered by calling APIs. It's a simple way to get answers to questions that you can't find on the web.</p>
-      <p>With API Agent, you can:</p>
-      <ul>
-        <li><strong>Access real-time data</strong> from multiple sources without writing code</li>
-        <li><strong>Automate research tasks</strong> that would normally require manual API calls</li>
-        <li><strong>Integrate information</strong> across different platforms and services</li>
-      </ul>
-      <p>Business teams use API Agent to monitor competitors, track market trends, and gather intelligence without technical expertise. Developers use it to quickly prototype and test API interactions without writing boilerplate code.</p>
-    </div>
-
     <div class="row">
       <aside class="col-lg-4 col-xl-3">
         <div id="api-sidebar" class="accordion position-sticky top-0 my-3" style="height: calc(100vh - 4.5rem); overflow-y: auto;"></div>
       </aside>
       <main class="col-lg-8 col-xl-9">
+        <h1 class="display-1 my-4 text-center">API Agent</h1>
+        <h2 class="display-6 text-center">Chat with your APIs</h2>
+
+        <div class="mx-auto my-3 narrative">
+          <p>API agent let's you ask questions that can be answered by calling APIs. It's a simple way to get answers to questions that you can't find on the web.</p>
+          <p>With API Agent, you can:</p>
+          <ul>
+            <li><strong>Access real-time data</strong> from multiple sources without writing code</li>
+            <li><strong>Automate research tasks</strong> that would normally require manual API calls</li>
+            <li><strong>Integrate information</strong> across different platforms and services</li>
+          </ul>
+          <p>Business teams use API Agent to monitor competitors, track market trends, and gather intelligence without technical expertise. Developers use it to quickly prototype and test API interactions without writing boilerplate code.</p>
+        </div>
         <form id="task-form" class="narrative mx-auto">
 
           <div class="my-4 p-4 card rounded-3 shadow-sm">
@@ -158,10 +156,11 @@
           <textarea class="form-control" name="question" id="question" rows="3" placeholder="Ask a question"></textarea>
           <button type="submit" class="btn btn-primary mt-2">Submit</button>
         </form>
+
+        <footer style="height: 50vh"></footer>
       </main>
     </div>
 
-    <footer style="height: 50vh"></footer>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" type="module"></script>
