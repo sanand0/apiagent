@@ -25,72 +25,47 @@ marked.use({
 const $taskForm = document.querySelector("#task-form");
 const $results = document.querySelector("#results");
 const $status = document.querySelector("#status");
-const $apiCards = document.querySelector("#api-cards");
+const $apiAccordion = document.querySelector("#api-accordion");
 const $exampleQuestions = document.querySelector("#example-questions");
-const $tokenInputs = document.querySelector("#token-inputs");
 const $systemPrompt = document.querySelector("#system-prompt");
 
 const formState = saveform("#task-form", { exclude: '[type="file"]' });
 const messages = [];
 const selectedApis = new Set([0]);
 
-// Render API cards based on config
-function renderApiCards() {
+function renderApis() {
   render(
-    demos.map(
-      (demo, index) => html`
-        <div class="col">
-          <div class="card h-100 api-card" data-index="${index}">
-            <div class="card-body text-center">
-              <i class="bi bi-${demo.icon} fs-1 mb-3"></i>
-              <h5 class="card-title">${demo.title}</h5>
-              <p class="card-text">${demo.description}</p>
-              <button class="btn btn-outline-primary select-api" data-index="${index}">Select</button>
-            </div>
-          </div>
+    demos.map((demo, i) => {
+      const publicApi = demo.params.every((p) => !p.required);
+      return html` <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button
+            class="accordion-button${i ? " collapsed" : ""}"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#api-${i}"
+            aria-expanded="${!i}"
+          >
+            <i class="bi bi-${demo.icon} me-2"></i>
+            ${demo.title}
+            ${publicApi
+              ? html`<span class="ms-2" data-bs-toggle="tooltip" data-bs-title="No API keys required">
+                  <i class="bi bi-globe-americas"></i>
+                </span>`
+              : ""}
+          </button>
+        </h2>
+        <div id="api-${i}" class="accordion-collapse collapse${i ? "" : " show"}" data-bs-parent="#api-accordion">
+          <div class="accordion-body" id="api-body-${i}"></div>
         </div>
-      `,
-    ),
-    $apiCards,
+      </div>`;
+    }),
+    $apiAccordion,
   );
 
-  // Add event listeners to API cards
-  document.querySelectorAll(".select-api").forEach((button) => {
-    button.addEventListener("click", (e) => {
-      const index = parseInt(e.target.dataset.index);
-      toggleApi(index);
-    });
-  });
-}
-
-// Toggle API selection and update the UI
-function toggleApi(index) {
-  if (selectedApis.has(index)) selectedApis.delete(index);
-  else selectedApis.add(index);
-  updateSelection();
-}
-
-function updateSelection() {
-  const apis = [...selectedApis].map((i) => demos[i]);
-
-  document.querySelectorAll(".api-card").forEach((card, i) => {
-    if (selectedApis.has(i)) card.classList.add("border-primary", "shadow");
-    else card.classList.remove("border-primary", "shadow");
-  });
-
-  render(
-    apis
-      .flatMap((api) => api.questions)
-      .map(
-        (q) =>
-          html`<button type="button" class="list-group-item list-group-item-action example-question">${q}</button>`,
-      ),
-    $exampleQuestions,
-  );
-
-  render(
-    apis.flatMap((api) =>
-      api.params.map(
+  demos.forEach((demo, i) => {
+    render(
+      demo.params.map(
         (p) =>
           html`<div class="mb-2">
             <label for="param-${p.key}" class="form-label d-flex justify-content-between">
@@ -114,13 +89,44 @@ function updateSelection() {
             />
           </div>`,
       ),
-    ),
-    $tokenInputs,
-  );
+      document.getElementById(`api-body-${i}`),
+    );
+  });
 
   formState.restore();
 
-  apis.forEach((api) => api.params.filter((p) => p.oauth).forEach(initOAuth));
+  [...document.querySelectorAll("#api-accordion .accordion-collapse")].forEach((el, i) => {
+    el.addEventListener("show.bs.collapse", () => toggleApi(i, true));
+    el.addEventListener("hide.bs.collapse", () => toggleApi(i, false));
+  });
+
+  demos.forEach((demo) => demo.params.filter((p) => p.oauth).forEach(initOAuth));
+}
+
+function toggleApi(index, show) {
+  const btn = $apiAccordion.querySelector(`button[data-bs-target="#api-${index}"]`);
+  if (show) {
+    selectedApis.add(index);
+    btn.classList.add("bg-success", "text-white");
+  } else {
+    selectedApis.delete(index);
+    btn.classList.remove("bg-success", "text-white");
+  }
+  updateSelection();
+}
+
+function updateSelection() {
+  const apis = [...selectedApis].map((i) => demos[i]);
+
+  render(
+    apis
+      .flatMap((api) => api.questions)
+      .map(
+        (q) =>
+          html`<button type="button" class="list-group-item list-group-item-action example-question">${q}</button>`,
+      ),
+    $exampleQuestions,
+  );
 
   $systemPrompt.value = apis.map((api) => api.prompt).join("\n\n");
   $systemPrompt.dispatchEvent(new Event("change", { bubbles: true }));
@@ -318,5 +324,5 @@ function renderSteps(steps) {
 }
 
 // Initialize the application
-renderApiCards();
+renderApis();
 updateSelection();
