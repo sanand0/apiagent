@@ -48,6 +48,7 @@ API Agent is an interactive web application that allows users to query APIs thro
   - [Google Custom Search API Key](https://developers.google.com/custom-search/v1/introduction)
   - [SerpApi Key](https://serpapi.com/manage-api-key)
   - [OpenRouter API Key](https://openrouter.ai/settings/keys)
+  - [Dropbox Access Token](https://www.dropbox.com/developers/apps)
 
 ### GitLab API Usage
 

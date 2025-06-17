@@ -441,6 +441,22 @@ Single entity responses return the object directly.
       },
     ],
   },
+  {
+    icon: "dropbox",
+    title: "Dropbox API",
+    description: "Manage files in your Dropbox account.",
+    prompt: "Use https://api.dropboxapi.com/2 with Authorization: Bearer ${params.dropbox}",
+    questions: ["List files in root", "Upload a demo.txt file", "Download /README.md"],
+    params: [
+      {
+        label: "Dropbox access token",
+        link: "https://www.dropbox.com/developers/apps",
+        required: true,
+        key: "dropbox",
+        type: "password",
+      },
+    ],
+  },
 ];
 
 // now() returns the current time to the nearest 10 minutes
