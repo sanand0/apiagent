@@ -306,7 +306,7 @@ Single entity responses return the object directly.
     title: "Google Custom Search",
     description: "Search the web with a Custom Search Engine.",
     prompt:
-      "Use Google Custom Search JSON API at https://www.googleapis.com/customsearch/v1. Send key=${params.cse} and your cx ID along with q, num and other params. Results come in items[] with title, link and snippet.",
+      "Use Google Custom Search JSON API at https://www.googleapis.com/customsearch/v1. Send key=${params.cse} and cx=${params.cx} along with q, num and other params. Results come in items[] with title, link and snippet.",
     questions: [
       "Search the web for tutorials on the Fetch API",
       "Find recent news about AI policy",
@@ -318,6 +318,13 @@ Single entity responses return the object directly.
         link: "https://developers.google.com/custom-search/v1/introduction",
         required: true,
         key: "cse",
+        type: "password",
+      },
+      {
+        label: "Custom Search Engine ID (cx)",
+        link: "https://developers.google.com/custom-search/v1/using_rest#search_engine_id",
+        required: true,
+        key: "cx",
         type: "password",
       },
     ],
