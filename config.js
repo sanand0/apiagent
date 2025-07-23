@@ -464,6 +464,28 @@ Single entity responses return the object directly.
       },
     ],
   },
+  {
+    icon: "reddit",
+    title: "Reddit API",
+    description: "Query Reddit posts, comments, users, subreddits, and more.",
+    prompt:
+      "Use Reddit REST API. If params.reddit is not empty, add Authorization: Bearer ${params.reddit}. Use endpoints like /r/{subreddit}/hot, /r/{subreddit}/comments/{article}, /user/{username}/about, /api/submit, /api/vote for posts, comments, user info, and voting. For user-specific actions, OAuth2 is required.",
+    questions: [
+      "What are the top posts in r/javascript this week?",
+      "Get the latest comments in r/learnprogramming.",
+      "Show user karma for u/spez.",
+      "List subreddits related to 'machine learning'.",
+    ],
+    params: [
+      {
+        label: "Reddit OAuth token",
+        link: "https://www.reddit.com/prefs/apps",
+        required: false,
+        key: "reddit",
+        type: "password",
+      },
+    ],
+  },
 ];
 
 // now() returns the current time to the nearest 10 minutes
