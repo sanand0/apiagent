@@ -486,6 +486,34 @@ Single entity responses return the object directly.
       },
     ],
   },
+  {
+    icon: "globe",
+    title: "Web Fetch",
+    description: "Fetch and analyze web page content via AI Pipe proxy.",
+    prompt: "Use AI Pipe proxy API to fetch web pages. Prefix all URLs with https://aipipe.org/proxy/ before sending. Important: When fetching content, limit response size by using these strategies:\n1. Use response.text() and take only first 250000 characters\n2. Extract only main content, skip headers/footers\n3. Focus on specific sections mentioned in the query\n4. Remove scripts, styles, and other non-content elements",
+    questions: [
+      "What's on the homepage of example.com?",
+      "Fetch the content from wikipedia.org about AI",
+      "Get the latest news from news.ycombinator.com",
+      "What are the trending topics on reddit.com/r/programming?",
+      "Show me the documentation from developer.mozilla.org about fetch API",
+    ],
+    params: [],
+  },
+  {
+    icon: "camera",
+    title: "Website Screenshot",
+    description: "Capture screenshots of any website using Thum.io API.",
+    prompt: "Use Thum.io API to capture website screenshots. IMPORTANT: You must return the screenshot URL in this EXACT markdown format:\n\n![Screenshot](https://image.thum.io/get/width/1200/TARGET_URL) eg. https://image.thum.io/get/width/1200/https://straive.com/\n\nExample code:\n```js\nexport async function run() {\n  const url = 'https://image.thum.io/get/width/1200/' + targetUrl;\n  return { markdown: `![Screenshot](${url})` };\n}\n```\nDo not describe or encode the URL or add any other text. Just return the object with markdown property.",
+    questions: [
+      "Take a screenshot of straive.com",
+      "Capture how amazon.com looks today",
+      "Show me what microsoft.com homepage looks like",
+      "Get a screenshot of github.com",
+      "Take a snapshot of developer.mozilla.org"
+    ],
+    params: [],
+  },
 ];
 
 // now() returns the current time to the nearest 10 minutes
@@ -497,6 +525,12 @@ export const agentPrompt = (apiInfo) => `You are an JavaScript developer followi
 2. You write browser JS code to solve it using API-DETAILS below.
 3. User runs your output and passes that along with LLM feedback. If needed, rewrite the code to solve it.
 4. The user may have follow-up questions. Interpret the latest question in context and go back to step 2.
+
+For screenshot requests:
+- Return markdown image: ![Screenshot](url)
+- Use https://image.thum.io/get/width/1200/ base URL
+- Append target website URL after the base URL
+- Validate the image URL is properly constructed
 
 # API Details
 
@@ -526,6 +560,13 @@ Current time (UTC): ${now()}`;
 
 export const validatorPrompt = `The user asked one or more questions. An LLM generated code and ran it. The output of the last step is below.
 
+For screenshot requests:
+- Check if the result has a 'markdown' property
+- The markdown should be in format: ![Screenshot](url)
+- The URL should start with https://image.thum.io/get/width/1200/
+- Do not describe the screenshot, just respond with "🟢 Screenshot rendered" if valid
+
+For other requests:
 If and ONLY IF the result answers the last question COMPLETELY, explain the answer in plain English, formatted as Markdown. Then say "🟢 DONE".
 If not, say "🔴 REVISE" and explain the MOST LIKELY error and how to fix it. No code required.
 
