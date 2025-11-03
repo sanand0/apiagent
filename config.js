@@ -105,7 +105,7 @@ export const demos = [
     icon: "google",
     title: "Google Workspace",
     description: "Access Gmail, Calendar and Drive using Google APIs.",
-    prompt: "Use Google Workspace APIs. Send Authorization: Bearer ${params.google}. Max 5 concurrent requests.",
+    prompt: "Use Google Workspace APIs. You have read + write API access to GMail, GCal, GDrive. Send Authorization: Bearer ${params.google}. Max 5 concurrent requests.",
     questions: [
       "List my unread Gmail messages in the inbox",
       "What events do I have tomorrow?",
@@ -126,7 +126,7 @@ export const demos = [
           // https://console.cloud.google.com/auth/clients/872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleusercontent.com?inv=1&invt=AbzTOQ&project=encoded-ensign-221
           clientId: "872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleusercontent.com",
           scope:
-            "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/drive.readonly",
+            "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive",
         },
       },
     ],
