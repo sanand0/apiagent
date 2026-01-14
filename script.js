@@ -281,8 +281,9 @@ function renderSteps(steps) {
   render(
     steps.map(({ name, content }, i) => {
       const stepNum = i + 1;
-      let markdown =
-        name == "result" ? "```json\n" + content + "\n```" : name == "error" ? "```\n" + content + "\n```" : content;
+      let markdown = name === "result" 
+        ? (() => { try { return JSON.parse(content).markdown || "```json\n" + content + "\n```"; } catch { return "```\n" + content + "\n```"; } })()
+        : name === "error" ? "```\n" + content + "\n```" : content;
       return html`
         <div class="card mb-3">
           <div
