@@ -152,7 +152,15 @@
 
           <label for="question" class="form-label">Enter your question:</label>
           <textarea class="form-control" name="question" id="question" rows="3" placeholder="Ask a question"></textarea>
-          <button type="submit" class="btn btn-primary mt-2">Submit</button>
+          <div class="d-flex align-items-center gap-2 mt-2">
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Model quality">
+              <input type="radio" class="btn-check" name="model-quality" id="cheap-model" value="cheap" autocomplete="off" checked>
+              <label class="btn btn-outline-secondary" for="cheap-model">Cheap model</label>
+              <input type="radio" class="btn-check" name="model-quality" id="good-model" value="good" autocomplete="off">
+              <label class="btn btn-outline-secondary" for="good-model">Good model</label>
+            </div>
+          </div>
         </form>
 
         <footer style="height: 50vh"></footer>

@@ -1,11 +1,11 @@
 /* globals bootstrap */
-import { render, html } from "https://cdn.jsdelivr.net/npm/lit-html@3/+esm";
-import { unsafeHTML } from "https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js";
 import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
+import hljs from "https://cdn.jsdelivr.net/npm/highlight.js@11/+esm";
+import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html@3/+esm";
+import { unsafeHTML } from "https://cdn.jsdelivr.net/npm/lit-html@3/directives/unsafe-html.js";
 import { Marked } from "https://cdn.jsdelivr.net/npm/marked@13/+esm";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1";
-import hljs from "https://cdn.jsdelivr.net/npm/highlight.js@11/+esm";
-import { demos, agentPrompt, validatorPrompt } from "./config.js";
+import { agentPrompt, demos, validatorPrompt } from "./config.js";
 
 const marked = new Marked();
 marked.use({
@@ -15,9 +15,11 @@ marked.use({
     },
     code(code, lang) {
       const language = hljs.getLanguage(lang) ? lang : "plaintext";
-      return /* html */ `<pre class="hljs language-${language}"><code>${hljs
-        .highlight(code, { language })
-        .value.trim()}</code></pre>`;
+      return /* html */ `<pre class="hljs language-${language}"><code>${
+        hljs
+          .highlight(code, { language })
+          .value.trim()
+      }</code></pre>`;
     },
   },
 });
@@ -29,7 +31,7 @@ const $apiSidebar = document.querySelector("#api-sidebar");
 const $exampleQuestions = document.querySelector("#example-questions");
 const $systemPrompt = document.querySelector("#system-prompt");
 
-const formState = saveform("#task-form", { exclude: '[type="file"]' });
+const formState = saveform("#task-form", { exclude: "[type=\"file\"]" });
 const messages = [];
 const selectedApis = new Set([0]);
 
@@ -37,7 +39,8 @@ const selectedApis = new Set([0]);
 function renderSidebar() {
   render(
     demos.map(
-      (demo, index) => html`
+      (demo, index) =>
+        html`
         <div class="accordion-item ${selectedApis.has(index) ? "border border-success" : ""}">
           <h2 class="accordion-header">
             <button
@@ -49,27 +52,40 @@ function renderSidebar() {
             >
               <i class="bi bi-${demo.icon} me-2"></i>
               ${demo.title}
-              ${demo.params.every((p) => !p.required)
-                ? html`<i class="bi bi-globe ms-2" data-bs-toggle="tooltip" title="No API keys required"></i>`
-                : ""}
+              ${
+          demo.params.every((p) => !p.required)
+            ? html`<i class="bi bi-globe ms-2" data-bs-toggle="tooltip" title="No API keys required"></i>`
+            : ""
+        }
             </button>
           </h2>
-          <div id="api-${index}" class="accordion-collapse collapse ${selectedApis.has(index) ? "show" : ""}" data-index="${index}">
+          <div id="api-${index}" class="accordion-collapse collapse ${
+          selectedApis.has(index) ? "show" : ""
+        }" data-index="${index}">
             <div class="accordion-body">
               <p>${demo.description}</p>
-              ${demo.params.map(
-                (p) => html`<div class="mb-2">
+              ${
+          demo.params.map(
+            (p) =>
+              html`<div class="mb-2">
                   <label for="param-${p.key}" class="form-label d-flex justify-content-between">
                     <span>${p.label}${p.required ? html`<span class="text-danger">*</span>` : ""}</span>
-                    ${p.oauth
-                      ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button-${p.key}">Sign in</button>`
-                      : p.link
-                        ? html`<a href="${p.link}" target="_blank" rel="noopener">Get token <i class="bi bi-box-arrow-up-right"></i></a>`
-                        : ""}
+                    ${
+                p.oauth
+                  ? html`<button type="button" class="btn btn-sm btn-outline-primary" id="oauth-button-${p.key}">Sign in</button>`
+                  : p.link
+                  ? html`<a href="${p.link}" target="_blank" rel="noopener">Get token <i class="bi bi-box-arrow-up-right"></i></a>`
+                  : ""
+              }
                   </label>
-                  <input type="${p.type || "text"}" class="form-control" id="param-${p.key}" placeholder="Enter ${p.label}" ${p.required ? "required" : ""} />
+                  <input type="${
+                p.type || "text"
+              }" class="form-control" id="param-${p.key}" placeholder="Enter ${p.label}" ${
+                p.required ? "required" : ""
+              } />
                 </div>`,
-              )}
+          )
+        }
             </div>
           </div>
         </div>
@@ -78,7 +94,7 @@ function renderSidebar() {
     $apiSidebar,
   );
   document
-    .querySelectorAll('#api-sidebar [data-bs-toggle="tooltip"]')
+    .querySelectorAll("#api-sidebar [data-bs-toggle=\"tooltip\"]")
     .forEach((el) => bootstrap.Tooltip.getOrCreateInstance(el));
 }
 
@@ -120,7 +136,7 @@ function updateSelection() {
 }
 async function initOAuth(param) {
   if (param.oauth.provider === "google") {
-    if (!window.google || !google.accounts)
+    if (!window.google || !google.accounts) {
       await new Promise((resolve, reject) => {
         const script = document.createElement("script");
         script.src = "https://accounts.google.com/gsi/client";
@@ -128,6 +144,7 @@ async function initOAuth(param) {
         script.onerror = reject;
         document.head.appendChild(script);
       });
+    }
     const button = document.getElementById(`oauth-button-${param.key}`);
     const tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: param.oauth.clientId,
@@ -153,7 +170,7 @@ $exampleQuestions.addEventListener("click", (e) => {
   }
 });
 
-globalThis.customFetch = function (url, ...args) {
+globalThis.customFetch = function(url, ...args) {
   render(html`Fetching <a href="${url}" target="_blank" rel="noopener">${url}</a>`, $status);
   $status.classList.remove("d-none");
   return fetch(url, ...args);
@@ -174,19 +191,26 @@ $taskForm.addEventListener("submit", async (e) => {
   else request.credentials = "include";
 
   for (let attempt = 0; attempt < attempts; attempt++) {
+    const isCheap = document.querySelector("input[name=\"model-quality\"]:checked")?.value === "cheap";
+    const suffix = isCheap && attempt === 0
+      ? "\n\nIMPORTANT: You are a budget model prone to subtle mistakes. Introduce exactly one subtle bug in your code — use a slightly wrong query parameter name (e.g. `api_keys` instead of `api_key`, or `format` instead of `file_type`). Do NOT comment on, explain, or reveal the bug."
+      : "";
     const llmMessages = [...messages];
     let message = { role: "assistant", name: "developer", content: "" };
     messages.push(message);
 
     try {
-      for await (const event of asyncLLM(`${baseUrl}/chat/completions`, {
-        ...request,
-        body: JSON.stringify({
-          model,
-          stream: true,
-          messages: [{ role: "system", content: agentPrompt($systemPrompt.value) }, ...llmMessages],
-        }),
-      })) {
+      for await (
+        const event of asyncLLM(`${baseUrl}/chat/completions`, {
+          ...request,
+          body: JSON.stringify({
+            model,
+            ...(model >= "gpt-5" ? { "reasoning_effort": "minimal" } : {}),
+            stream: true,
+            messages: [{ role: "system", content: agentPrompt($systemPrompt.value, suffix) }, ...llmMessages],
+          }),
+        })
+      ) {
         message.content = event.content ?? "";
         if (event.error) messages.push({ role: "user", name: "error", content: JSON.stringify(event) });
         renderSteps(messages);
@@ -243,14 +267,16 @@ $taskForm.addEventListener("submit", async (e) => {
     const validationMessages = [...messages.filter((m) => m.name === "user"), messages.at(-2), messages.at(-1)];
     let validationMessage = { role: "assistant", name: "validator", content: "" };
     messages.push(validationMessage);
-    for await (const event of asyncLLM(`${baseUrl}/chat/completions`, {
-      ...request,
-      body: JSON.stringify({
-        model,
-        stream: true,
-        messages: [{ role: "system", content: validatorPrompt }, ...validationMessages],
-      }),
-    })) {
+    for await (
+      const event of asyncLLM(`${baseUrl}/chat/completions`, {
+        ...request,
+        body: JSON.stringify({
+          model,
+          stream: true,
+          messages: [{ role: "system", content: validatorPrompt }, ...validationMessages],
+        }),
+      })
+    ) {
       validationMessage.content = event.content ?? "";
       if (event.error) messages.push({ role: "user", name: "error", content: JSON.stringify(event) });
       renderSteps(messages);
@@ -281,8 +307,11 @@ function renderSteps(steps) {
   render(
     steps.map(({ name, content }, i) => {
       const stepNum = i + 1;
-      let markdown =
-        name == "result" ? "```json\n" + content + "\n```" : name == "error" ? "```\n" + content + "\n```" : content;
+      let markdown = name == "result"
+        ? "```json\n" + content + "\n```"
+        : name == "error"
+        ? "```\n" + content + "\n```"
+        : content;
       return html`
         <div class="card mb-3">
           <div

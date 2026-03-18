@@ -1,5 +1,47 @@
 export const demos = [
   {
+    icon: "bank",
+    title: "FRED API",
+    description: "Federal Reserve Economic Data — time-series economics data from the St. Louis Fed.",
+    prompt:
+      `Use the FRED (Federal Reserve Economic Data) API. Base URL: https://aipipe.org/proxy/https://api.stlouisfed.org/fred/
+Always append api_key=\${params.fred} and file_type=json to every request.
+
+Key endpoints:
+- GET /fred/series/search?search_text=<text>&limit=<n> — discover series by keyword; returns seriess[] with id, title, units, frequency, seasonal_adjustment.
+- GET /fred/series?series_id=<id> — metadata for a series: title, units, frequency, seasonal_adjustment, observation_start, observation_end.
+- GET /fred/series/observations?series_id=<id> — observation values. Supports:
+  - observation_start / observation_end (YYYY-MM-DD) to limit the window
+  - sort_order=desc to get newest first
+  - limit=<n> to cap results
+  - units=<transform> for server-side transforms: lin (levels), chg (change), ch1 (yr/yr change), pch (% change), pc1 (yr/yr % change), pca (compound annual rate), cch (continuously compounded rate), cca (continuously compounded annual rate), log (natural log)
+  - frequency=<agg> to aggregate: d, w, bw, m, q, sa, a
+  - aggregation_method: avg, sum, eop
+
+Always request file_type=json. Default format is XML; omitting it returns unparseable XML.
+Some series have leading "." placeholder values for missing data — filter those out when computing.
+`,
+    questions: [
+      "Fetch the daily 10-Year Treasury yield for the last 30 days.",
+      "Pull the monthly US Consumer Price Index (CPI) for the past 12 months and calculate the monthly growth.",
+      "Retrieve the daily US High Yield Corporate Bond average yield Year-to-Date and summarize it.",
+      "Yield curve inversion: calculate daily 10Y-2Y treasury constant maturity rate spread for 2 years. Month-by-month, summarize the spread.",
+      "Real corporate borrowing costs: Calculate the monthly real BBB corporate yield by subtracting YoY CPI inflation from the monthly-averaged BBB yield for the last 5 years. Display the results for the last 12 months.",
+      "Misery index tracker: Calculate a monthly Misery Index (unemployment rate plus YoY CPI inflation) from 2018 to present. Rank and display the top 10 months with the highest index values.",
+      "High yield credit spread: Calculate the daily credit spread (US High Yield Index minus 10-Year Treasury) for the last 3 years. Summarize the minimum, maximum, and average spread annually.",
+      "Mortgage rates vs. housing starts: Calculate the month-over-month percentage change for 30-year mortgage rates (resampled to monthly) and housing starts over the last 10 years. Display the combined results for the last 6 months.",
+    ],
+    params: [
+      {
+        label: "FRED API key",
+        link: "https://fredaccount.stlouisfed.org/apikeys",
+        required: true,
+        key: "fred",
+        type: "password",
+      },
+    ],
+  },
+  {
     icon: "github",
     title: "GitHub API",
     description: "Query GitHub repositories, users, issues, and more.",
@@ -105,7 +147,8 @@ export const demos = [
     icon: "google",
     title: "Google Workspace",
     description: "Access Gmail, Calendar and Drive using Google APIs.",
-    prompt: "Use Google Workspace APIs. You have read + write API access to GMail, GCal, GDrive. Send Authorization: Bearer ${params.google}. Max 5 concurrent requests.",
+    prompt:
+      "Use Google Workspace APIs. You have read + write API access to GMail, GCal, GDrive. Send Authorization: Bearer ${params.google}. Max 5 concurrent requests.",
     questions: [
       "List my unread Gmail messages in the inbox",
       "What events do I have tomorrow?",
@@ -491,7 +534,8 @@ Single entity responses return the object directly.
 // now() returns the current time to the nearest 10 minutes
 const now = () => new Date().toISOString().slice(0, -9) + "0:00.000Z";
 
-export const agentPrompt = (apiInfo) => `You are an JavaScript developer following this loop:
+export const agentPrompt = (apiInfo, suffix = "") =>
+  `You are an JavaScript developer following this loop:
 
 1. A user asks a question.
 2. You write browser JS code to solve it using API-DETAILS below.
@@ -522,9 +566,10 @@ The user will ALWAYS call \`result = await run({params})\` where \`params\` is a
 
 Do NOT forget to wrap in \`\`\`js ... \`\`\`
 
-Current time (UTC): ${now()}`;
+Current time (UTC): ${now()}${suffix}`;
 
-export const validatorPrompt = `The user asked one or more questions. An LLM generated code and ran it. The output of the last step is below.
+export const validatorPrompt =
+  `The user asked one or more questions. An LLM generated code and ran it. The output of the last step is below.
 
 If and ONLY IF the result answers the last question COMPLETELY, explain the answer in plain English, formatted as Markdown. Then say "🟢 DONE".
 If not, say "🔴 REVISE" and explain the MOST LIKELY error and how to fix it. No code required.
