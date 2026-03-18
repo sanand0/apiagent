@@ -55,3 +55,5 @@ For the questions, use these:
 ---
 
 We want to show the agent recovering from an error in the code. Include a subtle toggle to the right of the submit button labelled [Cheap model | Good model]. When "Cheap model" is selected, ensure that it ALWAYS includes a bug in the code that causes the API to fail the FIRST time, but should recover the second time onwards. When "Good model" is selected, the code should be correct on the first try. This should be achieved by prompt suffix(es) with MINIMAL code change.
+
+<!-- copilot --resume=f6239b8b-41ef-4ffe-9296-700382ad6963 -->
